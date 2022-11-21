@@ -5,6 +5,7 @@ from functools import partial
 from unittest.mock import ANY, call
 
 import pytest
+from pytest_mock import MockerFixture
 import pytest_mock
 from flask import Flask, current_app, url_for
 from freezegun import freeze_time
@@ -2364,7 +2365,7 @@ def test_send_one_off_notification(sample_service, admin_request, mocker):
     assert response["id"] == str(noti.id)
 
 
-def test_create_pdf_letter(mocker, sample_service_full_permissions, client, fake_uuid, notify_user):
+def test_create_pdf_letter(mocker: MockerFixture, sample_service_full_permissions, client, fake_uuid, notify_user):
     mocker.patch("app.service.send_notification.utils_s3download")
     mocker.patch("app.service.send_notification.get_page_count", return_value=1)
     mocker.patch("app.service.send_notification.move_uploaded_pdf_to_letters_bucket")
@@ -3485,7 +3486,7 @@ def test_cancel_notification_for_service_updates_letter_if_still_time_to_cancel(
     assert response["status"] == "cancelled"
 
 
-def test_get_monthly_notification_data_by_service(mocker, admin_request):
+def test_get_monthly_notification_data_by_service(mocker: MockerFixture, admin_request):
     dao_mock = mocker.patch(
         "app.service.rest.fact_notification_status_dao.fetch_monthly_notification_statuses_per_service",
         return_value=[],

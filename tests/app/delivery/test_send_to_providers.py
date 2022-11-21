@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest.mock import ANY, MagicMock, call
 
 import pytest
+from pytest_mock import MockerFixture
 from flask import current_app
 from notifications_utils.recipients import validate_and_format_phone_number
 from requests import HTTPError
@@ -1020,7 +1021,7 @@ def test_notification_document_with_pdf_attachment(
         ("link"),
     ],
 )
-def test_notification_with_bad_file_attachment_url(mocker, notify_db, notify_db_session, sending_method):
+def test_notification_with_bad_file_attachment_url(mocker: MockerFixture, notify_db, notify_db_session, sending_method):
     template = create_sample_email_template(notify_db, notify_db_session, content="Here is your ((file))")
     personalisation = {
         "file": document_download_response(

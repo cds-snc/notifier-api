@@ -1,12 +1,13 @@
 import json
 
 import pytest
+from pytest_mock import MockerFixture
 from flask import url_for
 from sqlalchemy.exc import DataError
 
 
 @pytest.fixture(scope="function")
-def app_for_test(mocker):
+def app_for_test(mocker: MockerFixture):
     import flask
     from flask import Blueprint
 

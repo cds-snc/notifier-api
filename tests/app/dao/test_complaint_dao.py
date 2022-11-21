@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
+from pytest_mock import MockerFixture
 
 from app.dao.complaint_dao import (
     fetch_complaints_by_service,
@@ -17,7 +18,7 @@ from tests.app.db import (
 )
 
 
-def test_fetch_paginated_complaints(mocker, sample_email_notification):
+def test_fetch_paginated_complaints(mocker: MockerFixture, sample_email_notification):
     mocker.patch.dict("app.dao.complaint_dao.current_app.config", {"PAGE_SIZE": 2})
     create_complaint(
         service=sample_email_notification.service,

@@ -2,6 +2,7 @@ import uuid
 from unittest.mock import Mock
 
 import pytest
+from pytest_mock import MockerFixture
 from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.recipients import InvalidPhoneError
 
@@ -32,13 +33,13 @@ from tests.app.db import (
 
 
 @pytest.fixture
-def persist_mock(mocker):
+def persist_mock(mocker: MockerFixture):
     noti = Mock(id=uuid.uuid4())
     return mocker.patch("app.service.send_notification.persist_notification", return_value=noti)
 
 
 @pytest.fixture
-def celery_mock(mocker):
+def celery_mock(mocker: MockerFixture):
     return mocker.patch("app.service.send_notification.send_notification_to_queue")
 
 
@@ -128,7 +129,7 @@ def test_send_one_off_notification_calls_persist_correctly_for_email(persist_moc
     )
 
 
-def test_send_one_off_notification_calls_persist_correctly_for_letter(mocker, persist_mock, celery_mock, notify_db_session):
+def test_send_one_off_notification_calls_persist_correctly_for_letter(mocker: MockerFixture, persist_mock, celery_mock, notify_db_session):
     mocker.patch(
         "app.service.send_notification.create_random_identifier",
         return_value="this-is-random-in-real-life",

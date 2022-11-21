@@ -2,6 +2,7 @@ import importlib
 import os
 
 import pytest
+from pytest_mock import MockerFixture
 
 from app import config
 from app.config import QueueNames
@@ -56,7 +57,7 @@ def test_queue_names_all_queues_correct():
     )
 
 
-def test_get_safe_config(mocker, reload_config):
+def test_get_safe_config(mocker: MockerFixture, reload_config):
     mock_get_class_attrs = mocker.patch("notifications_utils.logging.get_class_attrs")
     mock_get_sensitive_config = mocker.patch("app.config.Config.get_sensitive_config")
 

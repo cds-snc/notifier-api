@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app.performance_platform.total_sent_notifications import (
     get_total_sent_notifications_for_day,
@@ -10,7 +11,7 @@ from tests.app.db import create_ft_notification_status, create_template
 
 
 # This test assumes the local timezone is EST
-def test_send_total_notifications_sent_for_day_stats_stats_creates_correct_call(mocker, client):
+def test_send_total_notifications_sent_for_day_stats_stats_creates_correct_call(mocker: MockerFixture, client):
     send_stats = mocker.patch(
         "app.performance_platform.total_sent_notifications.performance_platform_client.send_stats_to_performance_platform"
     )  # noqa

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from unittest.mock import call
 
 import pytest
+from pytest_mock import MockerFixture
 from freezegun import freeze_time
 
 from app import db
@@ -188,7 +189,7 @@ def test_should_send_all_scheduled_notifications_to_deliver_queue(sample_templat
     assert not scheduled_notifications
 
 
-def test_check_job_status_task_raises_job_incomplete_error(mocker, sample_template):
+def test_check_job_status_task_raises_job_incomplete_error(mocker: MockerFixture, sample_template):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,
@@ -209,7 +210,7 @@ def test_check_job_status_task_raises_job_incomplete_error(mocker, sample_templa
     )
 
 
-def test_check_job_status_task_raises_job_incomplete_error_when_scheduled_job_is_not_complete(mocker, sample_template):
+def test_check_job_status_task_raises_job_incomplete_error_when_scheduled_job_is_not_complete(mocker: MockerFixture, sample_template):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,
@@ -230,7 +231,7 @@ def test_check_job_status_task_raises_job_incomplete_error_when_scheduled_job_is
     )
 
 
-def test_check_job_status_task_raises_job_incomplete_error_for_multiple_jobs(mocker, sample_template):
+def test_check_job_status_task_raises_job_incomplete_error_for_multiple_jobs(mocker: MockerFixture, sample_template):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,
@@ -260,7 +261,7 @@ def test_check_job_status_task_raises_job_incomplete_error_for_multiple_jobs(moc
     )
 
 
-def test_check_job_status_task_only_sends_old_tasks(mocker, sample_template):
+def test_check_job_status_task_only_sends_old_tasks(mocker: MockerFixture, sample_template):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,
@@ -290,7 +291,7 @@ def test_check_job_status_task_only_sends_old_tasks(mocker, sample_template):
     )
 
 
-def test_check_job_status_task_sets_jobs_to_error(mocker, sample_template):
+def test_check_job_status_task_sets_jobs_to_error(mocker: MockerFixture, sample_template):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,
@@ -388,7 +389,7 @@ def test_check_job_status_task_does_not_raise_error(sample_template):
 
 
 @freeze_time("2019-05-30 14:00:00")
-def test_check_precompiled_letter_state(mocker, sample_letter_template):
+def test_check_precompiled_letter_state(mocker: MockerFixture, sample_letter_template):
     mock_logger = mocker.patch("app.celery.tasks.current_app.logger.exception")
     mock_create_ticket = mocker.patch("app.celery.nightly_tasks.zendesk_client.create_ticket")
 
@@ -437,7 +438,7 @@ def test_check_precompiled_letter_state(mocker, sample_letter_template):
 
 @freeze_time("2019-05-30 14:00:00")
 @pytest.mark.skip(reason="Letter feature")
-def test_check_templated_letter_state_during_bst(mocker, sample_letter_template):
+def test_check_templated_letter_state_during_bst(mocker: MockerFixture, sample_letter_template):
     mock_logger = mocker.patch("app.celery.tasks.current_app.logger.exception")
     mock_create_ticket = mocker.patch("app.celery.nightly_tasks.zendesk_client.create_ticket")
 
@@ -471,7 +472,7 @@ def test_check_templated_letter_state_during_bst(mocker, sample_letter_template)
 
 @freeze_time("2019-01-30 14:00:00")
 @pytest.mark.skip(reason="Letter feature")
-def test_check_templated_letter_state_during_utc(mocker, sample_letter_template):
+def test_check_templated_letter_state_during_utc(mocker: MockerFixture, sample_letter_template):
     mock_logger = mocker.patch("app.celery.tasks.current_app.logger.exception")
     mock_create_ticket = mocker.patch("app.celery.nightly_tasks.zendesk_client.create_ticket")
 

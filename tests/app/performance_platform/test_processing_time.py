@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app.performance_platform.processing_time import (
     send_processing_time_data,
@@ -11,7 +12,7 @@ from tests.app.db import create_notification, save_notification
 
 @freeze_time("2016-10-18T06:00")
 # This test assumes the local timezone is EST
-def test_send_processing_time_to_performance_platform_generates_correct_calls(mocker, sample_template):
+def test_send_processing_time_to_performance_platform_generates_correct_calls(mocker: MockerFixture, sample_template):
     send_mock = mocker.patch("app.performance_platform.processing_time.send_processing_time_data")
 
     created_at = datetime.utcnow() - timedelta(days=1)

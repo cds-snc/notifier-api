@@ -4,6 +4,7 @@ from uuid import UUID
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 from fido2 import cbor
 from flask import url_for
 from freezegun import freeze_time
@@ -391,7 +392,7 @@ def test_post_user_attribute_with_updated_by(
         mock_persist_notification.assert_any_call(**arguments)
 
 
-def test_archive_user(mocker, client, sample_user):
+def test_archive_user(mocker: MockerFixture, client, sample_user):
     archive_mock = mocker.patch("app.user.rest.dao_archive_user")
 
     response = client.post(
@@ -403,7 +404,7 @@ def test_archive_user(mocker, client, sample_user):
     archive_mock.assert_called_once_with(sample_user)
 
 
-def test_archive_user_when_user_does_not_exist_gives_404(mocker, client, fake_uuid, notify_db_session):
+def test_archive_user_when_user_does_not_exist_gives_404(mocker: MockerFixture, client, fake_uuid, notify_db_session):
     archive_mock = mocker.patch("app.user.rest.dao_archive_user")
 
     response = client.post(
@@ -415,7 +416,7 @@ def test_archive_user_when_user_does_not_exist_gives_404(mocker, client, fake_uu
     archive_mock.assert_not_called()
 
 
-def test_archive_user_when_user_cannot_be_archived(mocker, client, sample_user):
+def test_archive_user_when_user_cannot_be_archived(mocker: MockerFixture, client, sample_user):
     mocker.patch("app.dao.users_dao.user_can_be_archived", return_value=False)
 
     response = client.post(

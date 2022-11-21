@@ -3,6 +3,7 @@ from datetime import date
 
 from flask import url_for
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from tests import create_authorization_header
 from tests.app.db import (
@@ -37,7 +38,7 @@ def test_get_all_complaints_returns_empty_complaints_list(client):
     assert json.loads(response.get_data(as_text=True))["complaints"] == []
 
 
-def test_get_all_complaints_returns_pagination_links(mocker, client, notify_db_session):
+def test_get_all_complaints_returns_pagination_links(mocker: MockerFixture, client, notify_db_session):
     mocker.patch.dict("app.dao.complaint_dao.current_app.config", {"PAGE_SIZE": 1})
     service_1 = create_service(service_name="service1")
     service_2 = create_service(service_name="service2")
@@ -59,7 +60,7 @@ def test_get_all_complaints_returns_pagination_links(mocker, client, notify_db_s
     }
 
 
-def test_get_complaint_with_start_and_end_date_passes_these_to_dao_function(mocker, client):
+def test_get_complaint_with_start_and_end_date_passes_these_to_dao_function(mocker: MockerFixture, client):
     start_date = date(2018, 6, 11)
     end_date = date(2018, 6, 11)
     dao_mock = mocker.patch("app.complaint.complaint_rest.fetch_count_of_complaints", return_value=3)
@@ -74,7 +75,7 @@ def test_get_complaint_with_start_and_end_date_passes_these_to_dao_function(mock
 
 
 @freeze_time("2018-06-01 11:00:00")
-def test_get_complaint_sets_start_and_end_date_to_today_if_not_specified(mocker, client):
+def test_get_complaint_sets_start_and_end_date_to_today_if_not_specified(mocker: MockerFixture, client):
     dao_mock = mocker.patch("app.complaint.complaint_rest.fetch_count_of_complaints", return_value=5)
     response = client.get(
         url_for("complaint.get_complaint_count"),

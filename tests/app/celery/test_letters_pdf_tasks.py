@@ -3,6 +3,7 @@ from unittest.mock import ANY, Mock, call
 
 import boto3
 import pytest
+from pytest_mock import MockerFixture
 import requests_mock
 from botocore.exceptions import ClientError
 from flask import current_app
@@ -129,7 +130,7 @@ def test_get_letters_pdf_calculates_billing_units(
 
 
 @freeze_time("2017-12-04 17:31:00")
-def test_create_letters_pdf_calls_s3upload(mocker, sample_letter_notification):
+def test_create_letters_pdf_calls_s3upload(mocker: MockerFixture, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", "1"))
     mock_s3 = mocker.patch("app.letters.utils.s3upload")
 
@@ -144,7 +145,7 @@ def test_create_letters_pdf_calls_s3upload(mocker, sample_letter_notification):
 
 
 @freeze_time("2017-12-04 17:31:00")
-def test_create_letters_pdf_calls_s3upload_for_test_letters(mocker, sample_letter_notification):
+def test_create_letters_pdf_calls_s3upload_for_test_letters(mocker: MockerFixture, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", "1"))
     mock_s3 = mocker.patch("app.letters.utils.s3upload")
     sample_letter_notification.key_type = "test"
@@ -159,7 +160,7 @@ def test_create_letters_pdf_calls_s3upload_for_test_letters(mocker, sample_lette
     )
 
 
-def test_create_letters_pdf_sets_billable_units(mocker, sample_letter_notification):
+def test_create_letters_pdf_sets_billable_units(mocker: MockerFixture, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", 1))
     mocker.patch("app.letters.utils.s3upload")
 
@@ -173,7 +174,7 @@ def test_create_letters_pdf_non_existent_notification(notify_api, mocker, fake_u
         create_letters_pdf(fake_uuid)
 
 
-def test_create_letters_pdf_handles_request_errors(mocker, sample_letter_notification):
+def test_create_letters_pdf_handles_request_errors(mocker: MockerFixture, sample_letter_notification):
     mock_get_letters_pdf = mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", side_effect=RequestException)
     mock_retry = mocker.patch("app.celery.letters_pdf_tasks.create_letters_pdf.retry")
 
@@ -183,7 +184,7 @@ def test_create_letters_pdf_handles_request_errors(mocker, sample_letter_notific
     assert mock_retry.called
 
 
-def test_create_letters_pdf_handles_s3_errors(mocker, sample_letter_notification):
+def test_create_letters_pdf_handles_s3_errors(mocker: MockerFixture, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", 1))
     error_response = {
         "Error": {
@@ -204,7 +205,7 @@ def test_create_letters_pdf_handles_s3_errors(mocker, sample_letter_notification
     assert mock_retry.called
 
 
-def test_create_letters_pdf_sets_technical_failure_max_retries(mocker, sample_letter_notification):
+def test_create_letters_pdf_sets_technical_failure_max_retries(mocker: MockerFixture, sample_letter_notification):
     mock_get_letters_pdf = mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", side_effect=RequestException)
     mock_retry = mocker.patch(
         "app.celery.letters_pdf_tasks.create_letters_pdf.retry",

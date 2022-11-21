@@ -3,6 +3,7 @@ from functools import partial
 from unittest.mock import PropertyMock, call, patch
 
 import pytest
+from pytest_mock import MockerFixture
 import pytz
 from flask import current_app
 from freezegun import freeze_time
@@ -143,7 +144,7 @@ def test_will_remove_csv_files_for_jobs_older_than_retention_period(notify_db, n
 
 
 @freeze_time("2017-01-01 10:00:00")
-def test_remove_csv_files_filters_by_type(mocker, sample_service):
+def test_remove_csv_files_filters_by_type(mocker: MockerFixture, sample_service):
     mocker.patch("app.celery.nightly_tasks.s3.remove_job_from_s3")
     """
     Jobs older than seven days are deleted, but only two day's worth (two-day window)
@@ -158,7 +159,7 @@ def test_remove_csv_files_filters_by_type(mocker, sample_service):
 
     remove_letter_csv_files()
 
-    assert s3.remove_job_from_s3.call_args_list == [
+    assert s3.remove_job_from_s3.call_args_list == [  # type: ignore
         call(job_to_delete.service_id, job_to_delete.id),
     ]
 
@@ -305,7 +306,7 @@ def test_should_call_delete_inbound_sms(notify_api, mocker):
 
 
 @freeze_time("2017-01-01 10:00:00")
-def test_remove_dvla_transformed_files_removes_expected_files(mocker, sample_service):
+def test_remove_dvla_transformed_files_removes_expected_files(mocker: MockerFixture, sample_service):
     mocker.patch("app.celery.nightly_tasks.s3.remove_transformed_dvla_file")
 
     letter_template = create_template(service=sample_service, template_type=LETTER_TYPE)
@@ -331,7 +332,7 @@ def test_remove_dvla_transformed_files_removes_expected_files(mocker, sample_ser
     job(created_at=just_over_ten_days)
     remove_transformed_dvla_files()
 
-    s3.remove_transformed_dvla_file.assert_has_calls(
+    s3.remove_transformed_dvla_file.assert_has_calls(  # type: ignore
         [
             call(job_to_delete_1.id),
             call(job_to_delete_2.id),
@@ -342,7 +343,7 @@ def test_remove_dvla_transformed_files_removes_expected_files(mocker, sample_ser
     )
 
 
-def test_remove_dvla_transformed_files_does_not_remove_files(mocker, sample_service):
+def test_remove_dvla_transformed_files_does_not_remove_files(mocker: MockerFixture, sample_service):
     mocker.patch("app.celery.nightly_tasks.s3.remove_transformed_dvla_file")
 
     letter_template = create_template(service=sample_service, template_type=LETTER_TYPE)
@@ -361,7 +362,7 @@ def test_remove_dvla_transformed_files_does_not_remove_files(mocker, sample_serv
 
     remove_transformed_dvla_files()
 
-    s3.remove_transformed_dvla_file.assert_has_calls([])
+    s3.remove_transformed_dvla_file.assert_has_calls([])  # type: ignore
 
 
 @freeze_time("2016-01-01 11:00:00")
@@ -534,7 +535,7 @@ def test_tuesday_alert_if_letter_notifications_still_sending_reports_friday_lett
 
 
 @freeze_time("2018-01-11T23:00:00")
-def test_letter_raise_alert_if_no_ack_file_for_zip_does_not_raise_when_files_match_zip_list(mocker, notify_db):
+def test_letter_raise_alert_if_no_ack_file_for_zip_does_not_raise_when_files_match_zip_list(mocker: MockerFixture, notify_db):
     mock_file_list = mocker.patch("app.aws.s3.get_list_of_files_by_suffix", side_effect=mock_s3_get_list_match)
     letter_raise_alert_if_no_ack_file_for_zip()
 
@@ -557,7 +558,7 @@ def test_letter_raise_alert_if_no_ack_file_for_zip_does_not_raise_when_files_mat
 
 
 @freeze_time("2018-01-11T23:00:00")
-def test_letter_raise_alert_if_ack_files_not_match_zip_list(mocker, notify_db):
+def test_letter_raise_alert_if_ack_files_not_match_zip_list(mocker: MockerFixture, notify_db):
     mock_file_list = mocker.patch("app.aws.s3.get_list_of_files_by_suffix", side_effect=mock_s3_get_list_diff)
     mock_zendesk = mocker.patch("app.celery.nightly_tasks.zendesk_client.create_ticket")
 
@@ -580,7 +581,7 @@ def test_letter_raise_alert_if_ack_files_not_match_zip_list(mocker, notify_db):
 
 
 @freeze_time("2018-01-11T23:00:00")
-def test_letter_not_raise_alert_if_no_files_do_not_cause_error(mocker, notify_db):
+def test_letter_not_raise_alert_if_no_files_do_not_cause_error(mocker: MockerFixture, notify_db):
     mock_file_list = mocker.patch("app.aws.s3.get_list_of_files_by_suffix", side_effect=None)
     letter_raise_alert_if_no_ack_file_for_zip()
 

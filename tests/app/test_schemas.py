@@ -1,6 +1,7 @@
 import pytest
 from marshmallow import ValidationError
 from sqlalchemy import desc
+from pytest_mock import MockerFixture
 
 from app.dao.provider_details_dao import dao_update_provider_details
 from app.models import ProviderDetailsHistory
@@ -114,7 +115,7 @@ def test_user_update_schema_rejects_disallowed_attribute_keys(user_attribute):
     assert excinfo.value.messages["_schema"][0] == "Unknown field name {}".format(user_attribute)
 
 
-def test_provider_details_schema_returns_user_details(mocker, sample_user, current_sms_provider):
+def test_provider_details_schema_returns_user_details(mocker: MockerFixture, sample_user, current_sms_provider):
     from app.schemas import provider_details_schema
 
     mocker.patch("app.provider_details.switch_providers.get_user_by_id", return_value=sample_user)

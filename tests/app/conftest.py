@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytest
+from pytest_mock import MockerFixture
 import pytz
 import requests_mock
 from flask import current_app, url_for
@@ -903,22 +904,22 @@ def sample_notification_history(
 
 
 @pytest.fixture(scope="function")
-def mock_celery_send_sms_code(mocker):
+def mock_celery_send_sms_code(mocker: MockerFixture):
     return mocker.patch("app.celery.tasks.send_sms_code.apply_async")
 
 
 @pytest.fixture(scope="function")
-def mock_celery_email_registration_verification(mocker):
+def mock_celery_email_registration_verification(mocker: MockerFixture):
     return mocker.patch("app.celery.tasks.email_registration_verification.apply_async")
 
 
 @pytest.fixture(scope="function")
-def mock_celery_send_email(mocker):
+def mock_celery_send_email(mocker: MockerFixture):
     return mocker.patch("app.celery.tasks.send_email.apply_async")
 
 
 @pytest.fixture(scope="function")
-def mock_encryption(mocker):
+def mock_encryption(mocker: MockerFixture):
     return mocker.patch("app.encryption.CryptoSigner.sign", return_value="something_encrypted")
 
 
@@ -1420,13 +1421,13 @@ def admin_request(client):
 
 
 @pytest.fixture(scope="function")
-def app_statsd(mocker):
+def app_statsd(mocker: MockerFixture):
     current_app.config["NOTIFY_ENVIRONMENT"] = "test"
     current_app.config["NOTIFY_APP_NAME"] = "api"
     current_app.config["STATSD_HOST"] = "localhost"
     current_app.config["STATSD_PORT"] = "8000"
     current_app.config["STATSD_PREFIX"] = "prefix"
-    current_app.statsd_client = mocker.Mock()
+    current_app.statsd_client = mocker.Mock()  # type: ignore
     return current_app
 
 

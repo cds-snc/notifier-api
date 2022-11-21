@@ -4,6 +4,7 @@ from textwrap import dedent
 
 import botocore
 import pytest
+from pytest_mock import MockerFixture
 from notifications_utils.recipients import InvalidEmailError
 
 from app import aws_ses_client
@@ -175,7 +176,7 @@ def test_send_email_handles_punycode_to_address(notify_api, mocker):
     assert f"To: {expected_to}" in raw_message
 
 
-def test_send_email_raises_bad_email_as_InvalidEmailError(mocker):
+def test_send_email_raises_bad_email_as_InvalidEmailError(mocker: MockerFixture):
     boto_mock = mocker.patch.object(aws_ses_client, "_client", create=True)
     mocker.patch.object(aws_ses_client, "statsd_client", create=True)
     error_response = {
@@ -200,7 +201,7 @@ def test_send_email_raises_bad_email_as_InvalidEmailError(mocker):
     assert "definitely@invalid_email.com" in str(excinfo.value)
 
 
-def test_send_email_raises_other_errs_as_AwsSesClientException(mocker):
+def test_send_email_raises_other_errs_as_AwsSesClientException(mocker: MockerFixture):
     boto_mock = mocker.patch.object(aws_ses_client, "_client", create=True)
     mocker.patch.object(aws_ses_client, "statsd_client", create=True)
     error_response = {

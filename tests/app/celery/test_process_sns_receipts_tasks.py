@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+from pytest_mock import MockerFixture
 from freezegun import freeze_time
 
 from app import statsd_client
@@ -108,7 +109,7 @@ def test_process_sns_results_failed(
     assert mock_warning_logger.call_count == int(should_log_warning)
 
 
-def test_sns_callback_should_retry_if_notification_is_new(mocker):
+def test_sns_callback_should_retry_if_notification_is_new(mocker: MockerFixture):
     mock_retry = mocker.patch("app.celery.process_sns_receipts_tasks.process_sns_results.retry")
     mock_logger = mocker.patch("app.celery.process_sns_receipts_tasks.current_app.logger.error")
 
@@ -118,7 +119,7 @@ def test_sns_callback_should_retry_if_notification_is_new(mocker):
         assert mock_retry.call_count == 1
 
 
-def test_sns_callback_should_log_if_notification_is_missing(mocker):
+def test_sns_callback_should_log_if_notification_is_missing(mocker: MockerFixture):
     mock_retry = mocker.patch("app.celery.process_sns_receipts_tasks.process_sns_results.retry")
     mock_logger = mocker.patch("app.celery.process_sns_receipts_tasks.current_app.logger.warning")
 
