@@ -1,8 +1,8 @@
 import json
 
 import pytest
-from pytest_mock import MockerFixture
 from flask import url_for
+from pytest_mock import MockerFixture
 from sqlalchemy.exc import DataError
 
 

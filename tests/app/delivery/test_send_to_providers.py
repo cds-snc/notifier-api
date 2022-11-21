@@ -4,9 +4,9 @@ from datetime import datetime
 from unittest.mock import ANY, MagicMock, call
 
 import pytest
-from pytest_mock import MockerFixture
 from flask import current_app
 from notifications_utils.recipients import validate_and_format_phone_number
+from pytest_mock import MockerFixture
 from requests import HTTPError
 
 import app

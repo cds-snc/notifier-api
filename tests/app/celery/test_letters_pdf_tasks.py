@@ -3,13 +3,13 @@ from unittest.mock import ANY, Mock, call
 
 import boto3
 import pytest
-from pytest_mock import MockerFixture
 import requests_mock
 from botocore.exceptions import ClientError
 from flask import current_app
 from freezegun import freeze_time
 from moto import mock_s3
 from PyPDF2.utils import PdfReadError
+from pytest_mock import MockerFixture
 from requests import RequestException
 from sqlalchemy.orm.exc import NoResultFound
 

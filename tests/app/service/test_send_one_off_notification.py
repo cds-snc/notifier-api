@@ -2,9 +2,9 @@ import uuid
 from unittest.mock import Mock
 
 import pytest
-from pytest_mock import MockerFixture
 from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.recipients import InvalidPhoneError
+from pytest_mock import MockerFixture
 
 from app.dao.service_safelist_dao import dao_add_and_commit_safelisted_contacts
 from app.models import (
@@ -129,7 +129,9 @@ def test_send_one_off_notification_calls_persist_correctly_for_email(persist_moc
     )
 
 
-def test_send_one_off_notification_calls_persist_correctly_for_letter(mocker: MockerFixture, persist_mock, celery_mock, notify_db_session):
+def test_send_one_off_notification_calls_persist_correctly_for_letter(
+    mocker: MockerFixture, persist_mock, celery_mock, notify_db_session
+):
     mocker.patch(
         "app.service.send_notification.create_random_identifier",
         return_value="this-is-random-in-real-life",

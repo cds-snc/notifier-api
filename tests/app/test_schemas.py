@@ -1,7 +1,7 @@
 import pytest
 from marshmallow import ValidationError
-from sqlalchemy import desc
 from pytest_mock import MockerFixture
+from sqlalchemy import desc
 
 from app.dao.provider_details_dao import dao_update_provider_details
 from app.models import ProviderDetailsHistory

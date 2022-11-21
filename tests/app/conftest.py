@@ -5,10 +5,10 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytest
-from pytest_mock import MockerFixture
 import pytz
 import requests_mock
 from flask import current_app, url_for
+from pytest_mock import MockerFixture
 from sqlalchemy import asc
 from sqlalchemy.orm.session import make_transient
 

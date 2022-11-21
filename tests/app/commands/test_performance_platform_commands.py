@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from pytest_mock import MockerFixture
 
 from app.commands import backfill_performance_platform_totals, backfill_processing_time

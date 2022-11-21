@@ -4,10 +4,10 @@ from uuid import UUID
 
 import mock
 import pytest
-from pytest_mock import MockerFixture
 from fido2 import cbor
 from flask import url_for
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app.dao.fido2_key_dao import create_fido2_session, save_fido2_key
 from app.dao.login_event_dao import save_login_event

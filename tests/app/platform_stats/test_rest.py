@@ -1,8 +1,8 @@
 from datetime import date, datetime
 
 import pytest
-from pytest_mock import MockerFixture
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app.errors import InvalidRequest
 from app.models import EMAIL_TYPE, SMS_TYPE

@@ -4,8 +4,8 @@ from textwrap import dedent
 
 import botocore
 import pytest
-from pytest_mock import MockerFixture
 from notifications_utils.recipients import InvalidEmailError
+from pytest_mock import MockerFixture
 
 from app import aws_ses_client
 from app.clients.email.aws_ses import AwsSesClientException, punycode_encode_email

@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from unittest.mock import call
 
 import pytest
-from pytest_mock import MockerFixture
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app import db
 from app.celery import scheduled_tasks, tasks
@@ -210,7 +210,9 @@ def test_check_job_status_task_raises_job_incomplete_error(mocker: MockerFixture
     )
 
 
-def test_check_job_status_task_raises_job_incomplete_error_when_scheduled_job_is_not_complete(mocker: MockerFixture, sample_template):
+def test_check_job_status_task_raises_job_incomplete_error_when_scheduled_job_is_not_complete(
+    mocker: MockerFixture, sample_template
+):
     mock_celery = mocker.patch("app.celery.tasks.notify_celery.send_task")
     job = create_job(
         template=sample_template,

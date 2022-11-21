@@ -1,8 +1,8 @@
 from datetime import datetime
 
 import pytest
-from pytest_mock import MockerFixture
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 from sqlalchemy import asc, desc
 
 from app import clients
@@ -135,7 +135,9 @@ def test_switch_sms_provider_to_inactive_provider_does_not_switch(restore_provid
 
 
 @pytest.mark.skip(reason="Currently using only 1 SMS provider")
-def test_toggle_sms_provider_switches_provider(mocker: MockerFixture, restore_provider_details, current_sms_provider, sample_user):
+def test_toggle_sms_provider_switches_provider(
+    mocker: MockerFixture, restore_provider_details, current_sms_provider, sample_user
+):
     mocker.patch("app.provider_details.switch_providers.get_user_by_id", return_value=sample_user)
     dao_toggle_sms_provider(current_sms_provider.identifier)
     new_provider = get_current_provider("sms")
@@ -147,7 +149,9 @@ def test_toggle_sms_provider_switches_provider(mocker: MockerFixture, restore_pr
 
 
 @pytest.mark.skip(reason="Currently using only 1 SMS provider")
-def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(mocker: MockerFixture, restore_provider_details, sample_user):
+def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(
+    mocker: MockerFixture, restore_provider_details, sample_user
+):
     mocker.patch("app.provider_details.switch_providers.get_user_by_id", return_value=sample_user)
     current_provider = get_current_provider("sms")
     new_provider = get_alternative_sms_provider(current_provider.identifier)
@@ -164,7 +168,9 @@ def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(mocker:
 
 
 @pytest.mark.skip(reason="Currently using only 1 SMS provider")
-def test_toggle_sms_provider_updates_provider_history(mocker: MockerFixture, restore_provider_details, current_sms_provider, sample_user):
+def test_toggle_sms_provider_updates_provider_history(
+    mocker: MockerFixture, restore_provider_details, current_sms_provider, sample_user
+):
     mocker.patch("app.provider_details.switch_providers.get_user_by_id", return_value=sample_user)
     provider_history_rows = (
         ProviderDetailsHistory.query.filter(ProviderDetailsHistory.id == current_sms_provider.id)

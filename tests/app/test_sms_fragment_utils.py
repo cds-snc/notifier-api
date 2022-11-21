@@ -1,6 +1,6 @@
 import pytest
-from pytest_mock import MockerFixture
 from notifications_utils.clients.redis import sms_daily_count_cache_key
+from pytest_mock import MockerFixture
 
 from app.sms_fragment_utils import (
     fetch_todays_requested_sms_count,

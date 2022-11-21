@@ -3,11 +3,11 @@ from functools import partial
 from unittest.mock import PropertyMock, call, patch
 
 import pytest
-from pytest_mock import MockerFixture
 import pytz
 from flask import current_app
 from freezegun import freeze_time
 from notifications_utils.clients.zendesk.zendesk_client import ZendeskClient
+from pytest_mock import MockerFixture
 
 from app.celery import nightly_tasks
 from app.celery.nightly_tasks import (

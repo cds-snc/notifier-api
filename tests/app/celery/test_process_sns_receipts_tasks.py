@@ -1,8 +1,8 @@
 from datetime import datetime
 
 import pytest
-from pytest_mock import MockerFixture
 from freezegun import freeze_time
+from pytest_mock import MockerFixture
 
 from app import statsd_client
 from app.aws.mocks import sns_failed_callback, sns_success_callback

@@ -5,7 +5,6 @@ from functools import partial
 from unittest.mock import ANY, call
 
 import pytest
-from pytest_mock import MockerFixture
 import pytest_mock
 from flask import Flask, current_app, url_for
 from freezegun import freeze_time
@@ -14,6 +13,7 @@ from notifications_utils.clients.redis import (
     near_daily_limit_cache_key,
     over_daily_limit_cache_key,
 )
+from pytest_mock import MockerFixture
 
 from app.dao.organisation_dao import dao_add_service_to_organisation
 from app.dao.service_sms_sender_dao import dao_get_sms_senders_by_service_id
