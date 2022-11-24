@@ -2851,23 +2851,38 @@ def test_delete_service_reply_to_email_address_archives_an_email_reply_to(sample
     assert reply_to.archived is True
 
 
-def test_delete_service_reply_to_email_address_returns_400_if_archiving_default_reply_to(
+def test_delete_service_reply_to_email_address_archives_default_reply_to_if_no_others_exist(
     admin_request, notify_db_session, sample_service
 ):
     reply_to = create_reply_to_email(service=sample_service, email_address="some@email.com")
 
-    response = admin_request.post(
+    admin_request.post(
         "service.delete_service_reply_to_email_address",
         service_id=sample_service.id,
         reply_to_email_id=reply_to.id,
+    )
+
+    assert reply_to.archived is True
+
+
+def test_delete_service_reply_to_email_address_returns_400_if_archiving_default_reply_to_and_others_exist(
+    admin_request, notify_db_session, sample_service
+):
+    reply_to_1 = create_reply_to_email(service=sample_service, email_address="some_1@email.com")
+    create_reply_to_email(service=sample_service, email_address="some_2@email.com")
+
+    response = admin_request.post(
+        "service.delete_service_reply_to_email_address",
+        service_id=sample_service.id,
+        reply_to_email_id=reply_to_1.id,
         _expected_status=400,
     )
 
     assert response == {
-        "message": "You cannot delete a default email reply to address",
+        "message": "You cannot delete a default email reply to address if other reply to addresses exist",
         "result": "error",
     }
-    assert reply_to.archived is False
+    assert reply_to_1.archived is False
 
 
 def test_get_email_reply_to_address(client, notify_db, notify_db_session):

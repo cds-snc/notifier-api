@@ -256,14 +256,25 @@ def test_archive_reply_to_email_address_does_not_archive_a_reply_to_for_a_differ
     assert not reply_to.archived
 
 
-def test_archive_reply_to_email_address_raises_an_error_if_attempting_to_archive_a_default(
+def test_archive_reply_to_email_address_if_default_and_no_other_addresses_exist(
     sample_service,
 ):
-    create_reply_to_email(service=sample_service, email_address="first@address.com", is_default=False)
     default_reply_to = create_reply_to_email(service=sample_service, email_address="first@address.com")
+
+    archive_reply_to_email_address(sample_service.id, default_reply_to.id)
+
+    assert default_reply_to.archived is True
+    assert default_reply_to.updated_at is not None
+
+
+def test_archive_reply_to_email_address_raises_an_error_if_default_and_other_addresses_exist(
+    sample_service,
+):
+    default_reply_to = create_reply_to_email(service=sample_service, email_address="first@address.com")
+    create_reply_to_email(service=sample_service, email_address="second@address.com", is_default=False)
 
     with pytest.raises(ArchiveValidationError) as e:
         archive_reply_to_email_address(sample_service.id, default_reply_to.id)
 
-    assert "You cannot delete a default email reply to address" in str(e.value)
+    assert "You cannot delete a default email reply to address if other reply to addresses exist" in str(e.value)
     assert not default_reply_to.archived

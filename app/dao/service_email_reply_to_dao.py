@@ -68,7 +68,11 @@ def archive_reply_to_email_address(service_id, reply_to_id):
     reply_to_archive = ServiceEmailReplyTo.query.filter_by(id=reply_to_id, service_id=service_id).one()
 
     if reply_to_archive.is_default:
-        raise ArchiveValidationError("You cannot delete a default email reply to address")
+        non_archived_reply_tos = dao_get_reply_to_by_service_id(service_id)
+        if len(non_archived_reply_tos) > 1:
+            # this error should not be displayed in Admin, only if a user manually sends a post request
+            raise ArchiveValidationError("You cannot delete a default email reply to address if other reply to addresses exist")
+        reply_to_archive.is_default = False
 
     reply_to_archive.archived = True
 
