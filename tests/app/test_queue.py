@@ -255,11 +255,21 @@ class TestRedisQueue:
     def test_acknowledged_messages(self, redis, redis_queue):
         with self.given_inbox_with_one_element(redis, redis_queue):
             (receipt, elements) = redis_queue.poll(10)
-            redis_queue.acknowledge(receipt)
+            assert redis_queue.acknowledge(receipt)
             assert len(elements) > 0
             assert redis.llen(Buffer.INBOX.inbox_name(QNAME_SUFFIX)) == 0
             assert redis.llen(Buffer.IN_FLIGHT.inflight_name(receipt, QNAME_SUFFIX)) == 0
             assert len(redis.keys("*")) == 0
+
+    @pytest.mark.serial
+    def test_acknowledge_invalid_inflight(self, redis, redis_queue):
+        with self.given_inbox_with_one_element(redis, redis_queue):
+            (receipt, elements) = redis_queue.poll(10)
+            assert not redis_queue.acknowledge("11111111-1111-1111-1111-1111")
+            assert len(elements) > 0
+            assert redis.llen(Buffer.INBOX.inbox_name(QNAME_SUFFIX)) == 0
+            assert redis.llen(Buffer.IN_FLIGHT.inflight_name(receipt, QNAME_SUFFIX)) == 1
+            assert len(redis.keys("*")) == 1
 
     @pytest.mark.serial
     def test_expire_inflights(self, redis, redis_queue):

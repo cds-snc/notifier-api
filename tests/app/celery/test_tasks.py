@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app import DATETIME_FORMAT, redis_store, signer
 from app.celery import provider_tasks, tasks
 from app.celery.tasks import (
+    acknowledge_receipt,
     choose_database_queue,
     get_template_class,
     handle_batch_error_and_forward,
@@ -90,6 +91,26 @@ def test_should_have_decorated_tasks_functions():
     assert process_job.__wrapped__.__name__ == "process_job"
     assert save_smss.__wrapped__.__name__ == "save_smss"
     assert save_emails.__wrapped__.__name__ == "save_emails"
+
+
+class TestAcknowledgeReceipt:
+    def test_acknowledge_happy_path(self, mocker):
+        receipt = uuid.uuid4()
+        acknowledge_sms_normal_mock = mocker.patch("app.sms_normal.acknowledge", return_value=True)
+        acknowledge_sms_priority_mock = mocker.patch("app.sms_bulk.acknowledge", return_value=False)
+        acknowledge_receipt(SMS_TYPE, NORMAL, receipt)
+        assert acknowledge_sms_normal_mock.called_once_with(receipt)
+        assert acknowledge_sms_priority_mock.not_called()
+
+    def test_acknowledge_wrong_queue(self, mocker, notify_api):
+        receipt = uuid.uuid4()
+        acknowledge_sms_bulk_mock = mocker.patch("app.sms_bulk.acknowledge", return_value=True)
+        acknowledge_receipt(EMAIL_TYPE, NORMAL, receipt)
+        assert acknowledge_sms_bulk_mock.called_once_with(receipt)
+
+    def test_acknowledge_no_queue(self):
+        with pytest.raises(ValueError):
+            acknowledge_receipt(None, None, uuid.uuid4())
 
 
 @pytest.fixture
@@ -170,7 +191,7 @@ class TestBatchSaving:
         )
 
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
-        acknowldege_mock = mocker.patch("app.sms_normal.acknowledge")
+        acknowledge_mock = mocker.patch("app.sms_normal.acknowledge")
 
         receipt = uuid.uuid4()
         save_smss(
@@ -191,7 +212,7 @@ class TestBatchSaving:
         assert persisted_notification[0]._personalisation == signer.sign({"name": "Jo"})
         assert persisted_notification[0].notification_type == SMS_TYPE
 
-        acknowldege_mock.assert_called_once_with(receipt)
+        acknowledge_mock.assert_called_once_with(receipt)
 
     def test_should_save_smss_acknowledge_queue(self, sample_template_with_placeholders, notify_api, mocker):
         notification1 = _notification_json(
@@ -252,7 +273,7 @@ class TestBatchSaving:
         )
 
         mocker.patch("app.celery.provider_tasks.deliver_email.apply_async")
-        acknowldege_mock = mocker.patch("app.email_normal.acknowledge")
+        acknowledge_mock = mocker.patch("app.email_normal.acknowledge")
 
         receipt = uuid.uuid4()
 
@@ -274,7 +295,7 @@ class TestBatchSaving:
         assert persisted_notification[0]._personalisation == signer.sign({"name": "Jo"})
         assert persisted_notification[0].notification_type == EMAIL_TYPE
 
-        acknowldege_mock.assert_called_once_with(receipt)
+        acknowledge_mock.assert_called_once_with(receipt)
 
     def test_should_not_forward_sms_on_duplicate(self, sample_template_with_placeholders, mocker):
         notification1 = _notification_json(

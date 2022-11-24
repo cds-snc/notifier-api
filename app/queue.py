@@ -165,16 +165,24 @@ class RedisQueue(Queue):
             put_batch_saving_expiry_metric(self.__metrics_logger, self, len(expired))
             current_app.logger.warning(f"Moved inflights {expired} back to inbox {self._inbox}")
 
-    def acknowledge(self, receipt: UUID):
+    def acknowledge(self, receipt: UUID) -> bool:
+        """
+        Remove the in-flight list from Redis
+
+        Args:
+        receipt: UUID
+            id of the inflight to remove
+
+        Returns: True if the inflight was found in that queue and removed, False otherwise
+        """
         inflight_name = Buffer.IN_FLIGHT.inflight_name(receipt, self._suffix, self._process_type)
-        # log an error if the inflight_name does not exist - that would mean we are deleting
-        # from the wrong queue.
-        if self._redis_client.exists(inflight_name):
-            current_app.logger.warning(f"Acknowleged inflight: {inflight_name}")
-        else:
+        if not self._redis_client.exists(inflight_name):
             current_app.logger.warning(f"Inflight to delete not found: {inflight_name}")
+            return False
         self._redis_client.delete(inflight_name)
+        current_app.logger.info(f"Acknowleged inflight: {inflight_name}")
         put_batch_saving_inflight_processed(self.__metrics_logger, self, 1)
+        return True
 
     def publish(self, message: str):
         self._redis_client.rpush(self._inbox, message)

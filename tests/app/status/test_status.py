@@ -13,6 +13,7 @@ def test_get_status_all_ok(client, notify_db_session, path):
     assert resp_json["db_version"]
     assert resp_json["commit_sha"]
     assert resp_json["build_time"]
+    assert resp_json["current_time_utc"]
 
 
 def test_empty_live_service_and_organisation_counts(admin_request):

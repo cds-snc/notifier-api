@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from flask import Blueprint, jsonify, request
 
 from app import db, version
@@ -15,6 +17,7 @@ def show_status():
     else:
         return (
             jsonify(
+                current_time_utc=str(str(datetime.now(timezone.utc))),
                 status="ok",  # This should be considered part of the public API
                 commit_sha=version.__commit_sha__,
                 build_time=version.__time__,
