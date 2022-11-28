@@ -4,10 +4,11 @@ services:
   db:
     image: postgres:11.2@sha256:85d0c745dc4f4627184da8945a36ac773762ec5d2ba1c1821cc7334b736e6e00
     volumes:
-      - ./local/initdb:/docker-entrypoint-initdb.d
+      - ./initdb:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: chummy
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     expose:
@@ -23,7 +24,7 @@ services:
     image: notification-api
     restart: always
     build:
-      context: .
+      context: ..
       dockerfile: local/Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -42,7 +43,7 @@ services:
     image: notification-api
     restart: on-failure
     build:
-      context: .
+      context: ..
       dockerfile: local/Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -60,7 +61,7 @@ services:
     image: notification-api
     restart: on-failure
     build:
-      context: .
+      context: ..
       dockerfile: local/Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -78,7 +79,7 @@ services:
     image: notification-api
     restart: on-failure
     build:
-      context: .
+      context: ..
       dockerfile: local/Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -96,8 +97,8 @@ services:
     image: notification-api-tests
     restart: "no"
     build:
-      context: .
-      dockerfile: ci/Dockerfile.test
+      context: ..
+      dockerfile: local/Dockerfile.test
     environment:
       - REDIS_URL=redis://redis:6379/1
       - SQLALCHEMY_DATABASE_URI=postgres://postgres:chummy@db:5432/test_notification_api
