@@ -17,7 +17,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app import redis_store
 from app.clients.zendesk_sell import ZenDeskSell
-from app.config import QueueNames
+from app.config import Config, QueueNames
 from app.dao import fact_notification_status_dao, notifications_dao
 from app.dao.api_key_dao import (
     expire_api_key,
@@ -706,10 +706,15 @@ def suspend_service(service_id):
     :param service_id:
     :return:
     """
+
     service = dao_fetch_service_by_id(service_id)
 
     if service.active:
         dao_suspend_service(service.id)
+        # TODO: Check if the service's bounce rate has been exceeded
+        # will depend on agreed upon method for fetching / storing
+        # a services bounce rate.
+        notify_bounce_rate_exceeded()
 
     return "", 204
 
@@ -726,6 +731,7 @@ def resume_service(service_id):
 
     if not service.active:
         dao_resume_service(service.id)
+        notify_service_resumed(dao_fetch_service_by_id(service_id))
 
     return "", 204
 
@@ -1123,3 +1129,75 @@ def check_if_reply_to_address_already_in_use(service_id, email_address):
             },
             status_code=400,
         )
+
+
+def notify_bounce_rate_exceeded(user_service):
+    service = Service.query.get(current_app.config["NOTIFY_SERVICE_ID"])
+    recipient = dao_fetch_service_creator(user_service.id).email_address
+    template = dao_get_template_by_id(current_app.config["BOUNCE_RATE_EXCEEDED_ID"])
+    reply_to = template.service.get_default_reply_to_email_address()
+
+    saved_notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=recipient,
+        service=service,
+        personalisation={
+            "service_name": user_service.name,
+            "contact_us_url": f"{Config.ADMIN_BASE_URL}/contact",
+        },
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=reply_to,
+    )
+
+    send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)
+
+
+def notify_bounce_rate_warning(user_service):
+    service = Service.query.get(current_app.config["NOTIFY_SERVICE_ID"])
+    user = dao_fetch_service_creator(user_service.id)
+    template = dao_get_template_by_id(current_app.config["BOUNCE_RATE_LIMIT_WARNING_ID"])
+    reply_to = template.service.get_default_reply_to_email_address()
+
+    saved_notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=user.email_address,
+        service=service,
+        personalisation={
+            "name": user.name,
+            "service_name": user_service.name,
+        },
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=reply_to,
+    )
+
+    send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)
+
+
+def notify_service_resumed(user_service):
+    service = Service.query.get(current_app.config["NOTIFY_SERVICE_ID"])
+    user = dao_fetch_service_creator(user_service.id)
+    template = dao_get_template_by_id(current_app.config["SERVICE_RESUMED_ID"])
+    reply_to = template.service.get_default_reply_to_email_address()
+
+    saved_notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=user.email_address,
+        service=service,
+        personalisation={
+            "name": user.name,
+            "service_name": user_service.name,
+        },
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=reply_to,
+    )
+
+    send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)

@@ -255,6 +255,9 @@ class Config(object):
     NEAR_DAILY_SMS_LIMIT_TEMPLATE_ID = "a796568f-a89b-468e-b635-8105554301b9"
     REACHED_DAILY_SMS_LIMIT_TEMPLATE_ID = "a646e614-c527-4f94-a955-ed7185d577f4"
     DAILY_SMS_LIMIT_UPDATED_TEMPLATE_ID = "6ec12dd0-680a-4073-8d58-91d17cc8442f"
+    BOUNCE_RATE_EXCEEDED_ID = "2dd32fab-0dd5-411b-9fa2-d23469eabbaf"
+    BOUNCE_RATE_WARNING_ID = "60d67125-e088-4793-a260-70d43982ec5a"
+    SERVICE_RESUMED_ID = "b393b19f-957f-4b4a-84b7-494dc1c615c3"
 
     # Allowed service IDs able to send HTML through their templates.
     ALLOW_HTML_SERVICE_IDS: List[str] = [id.strip() for id in os.getenv("ALLOW_HTML_SERVICE_IDS", "").split(",")]
