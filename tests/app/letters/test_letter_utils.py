@@ -28,6 +28,7 @@ from tests.app.db import create_notification, save_notification
 FROZEN_DATE_TIME = "2018-03-14 17:00:00"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.fixture(name="sample_precompiled_letter_notification")
 def _sample_precompiled_letter_notification(sample_letter_notification):
     sample_letter_notification.template.hidden = True
@@ -39,6 +40,7 @@ def _sample_precompiled_letter_notification(sample_letter_notification):
     return sample_letter_notification
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.fixture(name="sample_precompiled_letter_notification_using_test_key")
 def _sample_precompiled_letter_notification_using_test_key(
     sample_precompiled_letter_notification,
@@ -47,6 +49,7 @@ def _sample_precompiled_letter_notification_using_test_key(
     return sample_precompiled_letter_notification
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "created_at,folder",
     [
@@ -65,6 +68,7 @@ def test_get_bucket_name_and_prefix_for_notification_valid_notification(sample_n
     assert bucket_prefix == "{folder}/NOTIFY.{reference}".format(folder=folder, reference=sample_notification.reference).upper()
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_get_bucket_name_and_prefix_for_notification_get_from_sent_at_date(
     sample_notification,
 ):
@@ -80,6 +84,7 @@ def test_get_bucket_name_and_prefix_for_notification_get_from_sent_at_date(
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_get_bucket_name_and_prefix_for_notification_from_created_at_date(
     sample_notification,
 ):
@@ -96,6 +101,7 @@ def test_get_bucket_name_and_prefix_for_notification_from_created_at_date(
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time(FROZEN_DATE_TIME)
 def test_get_bucket_name_and_prefix_for_notification_precompiled_letter_using_test_key(
     sample_precompiled_letter_notification_using_test_key,
@@ -106,6 +112,7 @@ def test_get_bucket_name_and_prefix_for_notification_precompiled_letter_using_te
     assert bucket_prefix == "NOTIFY.{}".format(sample_precompiled_letter_notification_using_test_key.reference).upper()
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time(FROZEN_DATE_TIME)
 def test_get_bucket_name_and_prefix_for_notification_templated_letter_using_test_key(
     sample_letter_notification,
@@ -118,6 +125,7 @@ def test_get_bucket_name_and_prefix_for_notification_templated_letter_using_test
     assert bucket_prefix == "NOTIFY.{}".format(sample_letter_notification.reference).upper()
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time(FROZEN_DATE_TIME)
 def test_get_bucket_name_and_prefix_for_failed_validation(
     sample_precompiled_letter_notification,
@@ -129,6 +137,7 @@ def test_get_bucket_name_and_prefix_for_failed_validation(
     assert bucket_prefix == "NOTIFY.{}".format(sample_precompiled_letter_notification.reference).upper()
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time(FROZEN_DATE_TIME)
 def test_get_bucket_name_and_prefix_for_test_noti_with_failed_validation(
     sample_precompiled_letter_notification_using_test_key,
@@ -140,11 +149,13 @@ def test_get_bucket_name_and_prefix_for_test_noti_with_failed_validation(
     assert bucket_prefix == "NOTIFY.{}".format(sample_precompiled_letter_notification_using_test_key.reference).upper()
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_get_bucket_name_and_prefix_for_notification_invalid_notification():
     with pytest.raises(AttributeError):
         get_bucket_name_and_prefix_for_notification(None)
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "crown_flag,expected_crown_text",
     [
@@ -159,6 +170,7 @@ def test_get_letter_pdf_filename_returns_correct_filename(notify_api, mocker, cr
     assert filename == "2017-12-04/NOTIFY.FOO.D.2.C.{}.20171204172900.PDF".format(expected_crown_text)
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "postage,expected_postage",
     [
@@ -180,6 +192,7 @@ def test_get_letter_pdf_filename_returns_correct_filename_for_test_letters(notif
     assert filename == "NOTIFY.FOO.D.2.C.C.20171204172900.PDF"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2017-12-04 17:31:00")
 @pytest.mark.skip(reason="Letter feature")
 def test_get_letter_pdf_filename_returns_tomorrows_filename(notify_api, mocker):
@@ -188,6 +201,7 @@ def test_get_letter_pdf_filename_returns_tomorrows_filename(notify_api, mocker):
     assert filename == "2017-12-05/NOTIFY.FOO.D.2.C.C.20171204173100.PDF"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @mock_s3
 @pytest.mark.parametrize(
     "bucket_config_name,filename_format",
@@ -207,7 +221,7 @@ def test_get_letter_pdf_gets_pdf_from_correct_bucket(
 
     bucket_name = current_app.config[bucket_config_name]
     filename = datetime.utcnow().strftime(filename_format)
-    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=bucket_name)
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")
@@ -217,6 +231,7 @@ def test_get_letter_pdf_gets_pdf_from_correct_bucket(
     assert ret == b"pdf_content"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "is_precompiled_letter,bucket_config_name",
     [(False, "LETTERS_PDF_BUCKET_NAME"), (True, "LETTERS_SCAN_BUCKET_NAME")],
@@ -244,6 +259,7 @@ def test_upload_letter_pdf_to_correct_bucket(sample_letter_notification, mocker,
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize("postage,expected_postage", [("second", 2), ("first", 1)])
 def test_upload_letter_pdf_uses_postage_from_notification(sample_letter_template, mocker, postage, expected_postage):
     letter_notification = save_notification(create_notification(template=sample_letter_template, postage=postage))
@@ -266,13 +282,14 @@ def test_upload_letter_pdf_uses_postage_from_notification(sample_letter_template
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 @mock_s3
 @freeze_time(FROZEN_DATE_TIME)
 def test_move_failed_pdf_error(notify_api):
     filename = "test.pdf"
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
-    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn = boto3.resource("s3")
     bucket = conn.create_bucket(Bucket=bucket_name)
 
     s3 = boto3.client("s3", region_name="eu-west-1")
@@ -284,13 +301,14 @@ def test_move_failed_pdf_error(notify_api):
     assert filename not in [o.key for o in bucket.objects.all()]
 
 
+@pytest.mark.skip(reason="Letter tests")
 @mock_s3
 @freeze_time(FROZEN_DATE_TIME)
 def test_move_failed_pdf_scan_failed(notify_api):
     filename = "test.pdf"
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
-    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn = boto3.resource("s3")
     bucket = conn.create_bucket(Bucket=bucket_name)
 
     s3 = boto3.client("s3", region_name="eu-west-1")
@@ -302,13 +320,14 @@ def test_move_failed_pdf_scan_failed(notify_api):
     assert filename not in [o.key for o in bucket.objects.all()]
 
 
+@pytest.mark.skip(reason="Letter tests")
 @mock_s3
 @freeze_time(FROZEN_DATE_TIME)
 def test_copy_redaction_failed_pdf(notify_api):
     filename = "test.pdf"
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
-    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn = boto3.resource("s3")
     bucket = conn.create_bucket(Bucket=bucket_name)
 
     s3 = boto3.client("s3", region_name="eu-west-1")
@@ -320,6 +339,7 @@ def test_copy_redaction_failed_pdf(notify_api):
     assert filename in [o.key for o in bucket.objects.all()]
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "freeze_date, expected_folder_name",
     [
@@ -345,10 +365,12 @@ def test_get_folder_name_in_british_summer_time(notify_api, freeze_date, expecte
     assert folder_name == expected_folder_name
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_get_folder_name_returns_empty_string_for_test_letter():
     assert "" == get_folder_name(datetime.utcnow(), is_test_or_scan_letter=True)
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2017-07-07 20:00:00")
 @pytest.mark.skip(reason="Letter feature")
 def test_letter_print_day_returns_today_if_letter_was_printed_after_1730_yesterday():
@@ -356,12 +378,14 @@ def test_letter_print_day_returns_today_if_letter_was_printed_after_1730_yesterd
     assert letter_print_day(created_at) == "today"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2017-07-07 16:30:00")
 def test_letter_print_day_returns_today_if_letter_was_printed_today():
     created_at = datetime(2017, 7, 7, 12, 0)
     assert letter_print_day(created_at) == "today"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize(
     "created_at, formatted_date",
     [

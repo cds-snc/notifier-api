@@ -91,3 +91,40 @@ select * from email_stats
 union all
 select * from bulk_stats
 ```
+
+### Posts to /sms
+
+Similarly you can test sms with a command similar to
+```
+locust -f ./tasks_individual_sms.py  --run-time=10m --users=20 --ref=perf_sms_0112-aa
+```
+To see the timings, run the SQL
+```sql
+WITH
+    ref AS (VALUES ('perf_sms_0112-aa')),
+
+initial_data as (
+    select 
+        n.created_at, n.sent_at, n.updated_at, client_reference, notification_status as status, t.process_type as priority
+    from notifications n join templates t on n.template_id = t.id
+    where client_reference like concat('%', (table ref), '%')
+),
+data as (
+    select *,
+    EXTRACT(epoch FROM updated_at - created_at) as total_time,
+    EXTRACT(epoch FROM sent_at - created_at) as processing_time,
+    EXTRACT(epoch FROM updated_at - sent_at) as delivery_time
+    from initial_data
+),
+stats as (
+    select 
+        '/sms' endpoint,
+        status, priority, count(*),
+        percentile_cont(0.5) within group(order by total_time) AS total_median,
+        percentile_cont(0.5) within group(order by processing_time) AS processing_median,
+        percentile_cont(0.5) within group(order by delivery_time) AS delivery_median
+    from data
+    group by priority, status
+)
+select * from stats 
+```

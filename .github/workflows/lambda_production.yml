@@ -23,43 +23,39 @@ jobs:
 
       - name: Configure AWS credentials
         id: aws-creds
-        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1.7.0
         with:
           aws-access-key-id: ${{ secrets.PRODUCTION_ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PRODUCTION_ECR_SECRET_ACCESS_KEY }}
           aws-region: ca-central-1
-          
-      - name: Retrieve New Relic Lambda layer
+
+      - name: Set Docker image tag
         run: |
-          aws lambda get-layer-version-by-arn \
-          --region ca-central-1 \
-          --arn arn:aws:lambda:ca-central-1:451483290750:layer:NewRelicPython39:12 \
-          | jq -r '.Content.Location' \
-          | xargs curl -o newrelic-layer.zip        
+          echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build container
         run: |
           docker build \
-          --build-arg GIT_SHA=${GITHUB_SHA::7} \
-          -t $REGISTRY/${{ matrix.image }}:${GITHUB_SHA::7} \
+          --build-arg GIT_SHA=$IMAGE_TAG \
+          -t $REGISTRY/${{ matrix.image }}:$IMAGE_TAG \
           . \
           -f ci/Dockerfile.lambda
 
       - name: Login to ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1
+        uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1.5.3
 
       - name: Push containers to ECR
         run: |
-          docker push $REGISTRY/${{ matrix.image }}:${GITHUB_SHA::7}
+          docker push $REGISTRY/${{ matrix.image }}:$IMAGE_TAG
 
       - name: Generate docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@00801dc7049671a1a9bfa25a11ef2c2709ca78ed # v1
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@a38917b147dfc8f086abcf81529e3c12f26529b8 # v2.1.0
         with:
-          dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
-          docker_image: $REGISTRY/${{ matrix.image }}:${GITHUB_SHA::7}
-          project_name: notification-api/docker/lambda
-          project_type: docker
+          docker_image: "${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.IMAGE_TAG }}"
+          dockerfile_path: "ci/Dockerfile.lambda"
+          sbom_name: "notification-api-lambda"
+          token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Logout of Amazon ECR
         run: docker logout ${{ steps.login-ecr.outputs.registry }}

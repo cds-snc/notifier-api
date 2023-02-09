@@ -149,6 +149,7 @@ class Config(object):
 
     # URL of redis instance
     REDIS_URL = os.getenv("REDIS_URL")
+    REDIS_PUBLISH_URL = os.getenv("REDIS_PUBLISH_URL", REDIS_URL)
     REDIS_ENABLED = env.bool("REDIS_ENABLED", False)
     EXPIRE_CACHE_TEN_MINUTES = 600
     EXPIRE_CACHE_EIGHT_DAYS = 8 * 24 * 60 * 60
@@ -165,6 +166,7 @@ class Config(object):
     FRESH_DESK_PRODUCT_ID = os.getenv("FRESH_DESK_PRODUCT_ID")
     FRESH_DESK_API_URL = os.getenv("FRESH_DESK_API_URL")
     FRESH_DESK_API_KEY = os.getenv("FRESH_DESK_API_KEY")
+    FRESH_DESK_ENABLED = env.bool("FRESH_DESK_ENABLED", True)
 
     # Logging
     DEBUG = False
@@ -442,6 +444,8 @@ class Config(object):
 
     SIMULATED_SMS_NUMBERS = ("+16132532222", "+16132532223", "+16132532224")
 
+    INTERNAL_TEST_NUMBER = "+16135550123"
+
     DVLA_BUCKETS = {
         "job": "{}-dvla-file-per-job".format(os.getenv("NOTIFY_ENVIRONMENT", "development")),
         "notification": "{}-dvla-letter-api-files".format(os.getenv("NOTIFY_ENVIRONMENT", "development")),
@@ -539,6 +543,7 @@ class Development(Config):
 
     SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "postgresql://postgres@localhost/notification_api")
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    REDIS_PUBLISH_URL = os.getenv("REDIS_PUBLISH_URL", "redis://localhost:6379/0")
 
     ANTIVIRUS_ENABLED = env.bool("ANTIVIRUS_ENABLED", False)
 

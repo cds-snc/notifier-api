@@ -28,7 +28,6 @@ from app.dao.service_sms_sender_dao import dao_get_service_sms_senders_by_id
 from app.models import (
     EMAIL_TYPE,
     INTERNATIONAL_SMS_TYPE,
-    KEY_TYPE_NORMAL,
     KEY_TYPE_TEAM,
     KEY_TYPE_TEST,
     LETTER_TYPE,
@@ -151,12 +150,8 @@ def time_until_end_of_day() -> timedelta:
     return datetime.combine(tomorrow, time.min) - dt
 
 
-def check_sms_limit_increment_redis_send_warnings_if_needed(
-    service: Service, requested_sms=0, key_type: ApiKeyType = KEY_TYPE_NORMAL
-) -> None:
+def check_sms_limit_increment_redis_send_warnings_if_needed(service: Service, requested_sms=0) -> None:
     if not current_app.config["FF_SPIKE_SMS_DAILY_LIMIT"]:
-        return
-    if key_type == KEY_TYPE_TEST:
         return
     if not current_app.config["REDIS_ENABLED"]:
         return
@@ -276,7 +271,7 @@ def service_can_send_to_recipient(send_to, key_type: ApiKeyType, service: Servic
         # FIXME: hard code it for now until we can get en/fr specific links and text
         if key_type == KEY_TYPE_TEAM:
             message = (
-                "Can’t send to this recipient using a team-only API key "
+                f"Can’t send to this recipient using a team-only API key (service {service.id}) "
                 f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
             )
         else:
@@ -322,8 +317,12 @@ def validate_and_format_recipient(
         return validate_and_format_email_address(email_address=send_to)
 
 
-def check_sms_content_char_count(content_count):
-    if content_count > SMS_CHAR_COUNT_LIMIT:
+def check_sms_content_char_count(content_count, service_name, prefix_sms: bool):
+    content_length = (
+        content_count + len(service_name) + 2 if prefix_sms else content_count
+    )  # the +2 is to account for the ': ' that is added to the service name
+
+    if content_length > SMS_CHAR_COUNT_LIMIT:
         message = "Content for template has a character count greater than the limit of {}".format(SMS_CHAR_COUNT_LIMIT)
         raise BadRequestError(message=message)
 
@@ -348,7 +347,7 @@ def validate_template(template_id, personalisation, service: Service, notificati
 
     template_with_content: Template = create_content_for_notification(template, personalisation)
     if template.template_type == SMS_TYPE:
-        check_sms_content_char_count(template_with_content.content_count)
+        check_sms_content_char_count(template_with_content.content_count, service.name, service.prefix_sms)
 
     check_content_is_not_blank(template_with_content)
 

@@ -19,6 +19,7 @@ from app.notifications.notifications_ses_callback import (
     remove_emails_from_bounce,
     remove_emails_from_complaint,
 )
+from celery.exceptions import MaxRetriesExceededError
 from tests.app.conftest import create_sample_notification
 from tests.app.db import (
     create_notification,
@@ -125,24 +126,21 @@ def test_ses_callback_should_retry_if_notification_is_new(notify_db, mocker):
         assert mock_retry.call_count == 1
 
 
-def test_ses_callback_should_log_if_notification_is_missing(notify_db, mocker):
+def test_ses_callback_should_retry_if_notification_is_missing(notify_db, mocker):
     mock_retry = mocker.patch("app.celery.process_ses_receipts_tasks.process_ses_results.retry")
+    assert process_ses_results(ses_notification_callback(reference="ref")) is None
+    assert mock_retry.call_count == 1
+
+
+def test_ses_callback_should_give_up_after_max_tries(notify_db, mocker):
+    mocker.patch(
+        "app.celery.process_ses_receipts_tasks.process_ses_results.retry",
+        side_effect=MaxRetriesExceededError,
+    )
     mock_logger = mocker.patch("app.celery.process_ses_receipts_tasks.current_app.logger.warning")
 
-    with freeze_time("2017-11-17T12:34:03.646Z"):
-        assert process_ses_results(ses_notification_callback(reference="ref")) is None
-        assert mock_retry.call_count == 0
-        mock_logger.assert_called_once_with("notification not found for reference: ref (update to delivered)")
-
-
-def test_ses_callback_should_not_retry_if_notification_is_old(notify_db, mocker):
-    mock_retry = mocker.patch("app.celery.process_ses_receipts_tasks.process_ses_results.retry")
-    mock_logger = mocker.patch("app.celery.process_ses_receipts_tasks.current_app.logger.error")
-
-    with freeze_time("2017-11-21T12:14:03.646Z"):
-        assert process_ses_results(ses_notification_callback(reference="ref")) is None
-        assert mock_logger.call_count == 0
-        assert mock_retry.call_count == 0
+    assert process_ses_results(ses_notification_callback(reference="ref")) is None
+    mock_logger.assert_called_with("notification not found for SES reference: ref (update to delivered). Giving up.")
 
 
 def test_ses_callback_does_not_call_send_delivery_status_if_no_db_entry(

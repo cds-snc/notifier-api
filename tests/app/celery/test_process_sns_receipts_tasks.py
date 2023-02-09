@@ -15,6 +15,7 @@ from app.models import (
     NOTIFICATION_TEMPORARY_FAILURE,
 )
 from app.notifications.callbacks import create_delivery_status_callback_data
+from celery.exceptions import MaxRetriesExceededError
 from tests.app.conftest import create_sample_notification
 from tests.app.db import (
     create_notification,
@@ -108,34 +109,21 @@ def test_process_sns_results_failed(
     assert mock_warning_logger.call_count == int(should_log_warning)
 
 
-def test_sns_callback_should_retry_if_notification_is_new(mocker):
+def test_sns_callback_should_retry_if_notification_is_missing(notify_db, mocker):
     mock_retry = mocker.patch("app.celery.process_sns_receipts_tasks.process_sns_results.retry")
-    mock_logger = mocker.patch("app.celery.process_sns_receipts_tasks.current_app.logger.error")
-
-    with freeze_time("2017-11-17T12:14:03.646Z"):
-        assert process_sns_results(sns_success_callback(reference="ref", timestamp="2017-11-17T12:14:02.000Z")) is None
-        assert mock_logger.call_count == 0
-        assert mock_retry.call_count == 1
+    assert process_sns_results(sns_success_callback(reference="ref")) is None
+    assert mock_retry.call_count == 1
 
 
-def test_sns_callback_should_log_if_notification_is_missing(mocker):
-    mock_retry = mocker.patch("app.celery.process_sns_receipts_tasks.process_sns_results.retry")
+def test_sns_callback_should_give_up_after_max_tries(notify_db, mocker):
+    mocker.patch(
+        "app.celery.process_sns_receipts_tasks.process_sns_results.retry",
+        side_effect=MaxRetriesExceededError,
+    )
     mock_logger = mocker.patch("app.celery.process_sns_receipts_tasks.current_app.logger.warning")
 
-    with freeze_time("2017-11-17T12:34:03.646Z"):
-        assert process_sns_results(sns_success_callback(reference="ref")) is None
-        assert mock_retry.call_count == 0
-        mock_logger.assert_called_once_with("notification not found for reference: ref (update to delivered)")
-
-
-def test_sns_callback_should_not_retry_if_notification_is_old(client, notify_db, mocker):
-    mock_retry = mocker.patch("app.celery.process_sns_receipts_tasks.process_sns_results.retry")
-    mock_logger = mocker.patch("app.celery.process_sns_receipts_tasks.current_app.logger.error")
-
-    with freeze_time("2017-11-17T12:16:00.000Z"):  # 6 minutes apart and max is 5 minutes
-        assert process_sns_results(sns_success_callback(reference="ref", timestamp="2017-11-17T12:10:00.000Z")) is None
-        assert mock_logger.call_count == 0
-        assert mock_retry.call_count == 0
+    assert process_sns_results(sns_success_callback(reference="ref")) is None
+    mock_logger.assert_called_with("notification not found for SNS reference: ref (update to delivered). Giving up.")
 
 
 def test_process_sns_results_retry_called(sample_template, mocker):

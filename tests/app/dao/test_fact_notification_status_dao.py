@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
+from unittest import mock
 from uuid import UUID
 
-import mock
 import pytest
 from freezegun import freeze_time
 from notifications_utils.timezones import convert_utc_to_local_timezone

@@ -492,7 +492,7 @@ def test_should_not_return_html_in_body(notify_api, notify_db, notify_db_session
             assert json.loads(response.get_data(as_text=True))["data"]["body"] == "hello\nthere"
 
 
-def test_should_not_send_email_if_team_api_key_and_not_a_service_user(notify_api, sample_email_template, mocker):
+def test_should_not_send_email_if_team_api_key_and_not_a_service_user(notify_api, sample_email_template, sample_service, mocker):
     with notify_api.test_request_context(), notify_api.test_client() as client:
         mocker.patch("app.celery.provider_tasks.deliver_email.apply_async")
         data = {
@@ -514,12 +514,12 @@ def test_should_not_send_email_if_team_api_key_and_not_a_service_user(notify_api
 
         assert response.status_code == 400
         assert [
-            "Can’t send to this recipient using a team-only API key "
+            f"Can’t send to this recipient using a team-only API key (service {sample_service.id}) "
             f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
         ] == json_resp["message"]["to"]
 
 
-def test_should_not_send_sms_if_team_api_key_and_not_a_service_user(notify_api, sample_template, mocker):
+def test_should_not_send_sms_if_team_api_key_and_not_a_service_user(notify_api, sample_template, sample_service, mocker):
     with notify_api.test_request_context(), notify_api.test_client() as client:
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
@@ -541,7 +541,7 @@ def test_should_not_send_sms_if_team_api_key_and_not_a_service_user(notify_api, 
 
         assert response.status_code == 400
         assert [
-            "Can’t send to this recipient using a team-only API key "
+            f"Can’t send to this recipient using a team-only API key (service {sample_service.id}) "
             f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
         ] == json_resp["message"]["to"]
 
@@ -849,7 +849,7 @@ def test_should_not_send_notification_to_non_safelist_recipient_in_trial_mode(
         ("Can’t send to this recipient when service is in trial mode " f'– see {get_document_url("en", "keys.html#live")}')
         if key_type == KEY_TYPE_NORMAL
         else (
-            "Can’t send to this recipient using a team-only API key "
+            f"Can’t send to this recipient using a team-only API key (service {service.id}) "
             f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
         )
     )

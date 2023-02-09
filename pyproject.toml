@@ -1,4 +1,4 @@
 [tool.black]
 line-length = 130
-target-version = ['py37', 'py38', 'py39']
+target-version = ['py37', 'py38', 'py39', 'py310']
 include = '(app|migrations|tests)/.*\.pyi?$'

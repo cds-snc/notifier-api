@@ -105,7 +105,7 @@ class AwsSesClient(EmailClient):
 
             # http://docs.aws.amazon.com/ses/latest/DeveloperGuide/api-error-codes.html
             if e.response["Error"]["Code"] == "InvalidParameterValue":
-                raise InvalidEmailError('email: "{}" message: "{}"'.format(to_addresses[0], e.response["Error"]["Message"]))
+                raise InvalidEmailError(f'message: "{e.response["Error"]["Message"]}"')
             else:
                 self.statsd_client.incr("clients.ses.error")
                 raise AwsSesClientException(str(e))

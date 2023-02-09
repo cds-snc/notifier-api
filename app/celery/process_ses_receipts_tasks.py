@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import iso8601
 from flask import current_app, json
 from notifications_utils.statsd_decorators import statsd
 from sqlalchemy.orm.exc import NoResultFound
@@ -46,12 +45,15 @@ def process_ses_results(self, response):
         try:
             notification = notifications_dao.dao_get_notification_by_reference(reference)
         except NoResultFound:
-            message_time = iso8601.parse_date(ses_message["mail"]["timestamp"]).replace(tzinfo=None)
-            if datetime.utcnow() - message_time < timedelta(minutes=5):
-                self.retry(queue=QueueNames.RETRY)
-            else:
+            try:
                 current_app.logger.warning(
-                    "notification not found for reference: {} (update to {})".format(reference, notification_status)
+                    f"RETRY {self.request.retries}: notification not found for SES reference {reference} (update to {notification_status}). "
+                    f"Callback may have arrived before notification was persisted to the DB. Adding task to retry queue"
+                )
+                self.retry(queue=QueueNames.RETRY)
+            except self.MaxRetriesExceededError:
+                current_app.logger.warning(
+                    f"notification not found for SES reference: {reference} (update to {notification_status}). Giving up."
                 )
             return
 

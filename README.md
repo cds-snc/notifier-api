@@ -25,13 +25,13 @@ For any issues during the following instructions, make sure to review the
 
 `brew install pyenv`
 
-2. Install Python 3.9.1 or whatever is the latest
+2. Install Python 3.10.8 or whatever is the latest
 
-`pyenv install 3.9.1`
+`pyenv install 3.10.8`
 
-3. If you expect no conflicts, set `3.9.1` as you default
+3. If you expect no conflicts, set `3.10.8` as you default
 
-`pyenv global 3.9.1`
+`pyenv global 3.10.8`
 
 4. Ensure it installed by running
 
@@ -46,12 +46,12 @@ if it did not, take a look here: https://github.com/pyenv/pyenv/issues/660
 6. Add the following to your shell rc file. ex: `.bashrc` or `.zshrc`
 
 ```
-source  ~/.pyenv/versions/3.9.1/bin/virtualenvwrapper.sh
+source  ~/.pyenv/versions/3.10.8/bin/virtualenvwrapper.sh
 ```
 
 7. Restart your terminal and make your virtual environtment:
 
-`mkvirtualenv -p ~/.pyenv/versions/3.9.1/bin/python notifications-api`
+`mkvirtualenv -p ~/.pyenv/versions/3.10.8/bin/python notifications-api`
 
 8. You can now return to your environment any time by entering
 
@@ -129,7 +129,7 @@ scripts/run_celery_beat.sh
 
 ### Python version
 
-This codebase is Python 3 only. At the moment we run 3.9.1 in production. You will run into problems if you try to use Python 3.4 or older.
+This codebase is Python 3 only. At the moment we run 3.10.8 in production. You will run into problems if you try to use Python 3.4 or older.
 
 ### To run Performance tests
 
@@ -192,7 +192,7 @@ createuser -l -s postgres
 
 __Problem__ : `E999 SyntaxError: invalid syntax` when running `flake8`
 
-__Solution__ : Check that you are in your correct virtualenv, with python 3.9
+__Solution__ : Check that you are in your correct virtualenv, with python 3.10
 
 ---
 

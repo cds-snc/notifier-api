@@ -6,6 +6,7 @@ from flask import Flask
 
 from app.clients.freshdesk import Freshdesk
 from app.user.contact_request import ContactRequest
+from tests.conftest import set_config_values
 
 
 def test_send_ticket_demo(notify_api: Flask):
@@ -219,4 +220,14 @@ def test_send_ticket_user_profile(notify_api: Flask):
                     user_profile="user_profile",
                 )
             ).send_ticket()
+            assert response == 201
+
+
+def test_send_ticket_freshdesk_integration_disabled(mocker, notify_api: Flask):
+    with set_config_values(notify_api, {"FRESH_DESK_ENABLED": "False"}):
+        mocked = mocker.patch("requests.post")
+
+        with notify_api.app_context():
+            response = Freshdesk(ContactRequest(email_address="test@email.com")).send_ticket()
+            mocked.assert_not_called()
             assert response == 201

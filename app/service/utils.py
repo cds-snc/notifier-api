@@ -1,5 +1,6 @@
 import itertools
 
+from flask import current_app
 from notifications_utils.recipients import allowed_to_send_to
 
 from app.models import (
@@ -27,13 +28,18 @@ def get_safelist_objects(service_id, request_json):
 
 
 def service_allowed_to_send_to(recipient, service, key_type, allow_safelisted_recipients=True):
-    members = safelisted_members(service, key_type, allow_safelisted_recipients)
+    is_simulated = False
+    if recipient in current_app.config["SIMULATED_EMAIL_ADDRESSES"] or recipient in current_app.config["SIMULATED_SMS_NUMBERS"]:
+        is_simulated = True
+
+    members = safelisted_members(service, key_type, is_simulated, allow_safelisted_recipients)
     if members is None:
         return True
+
     return allowed_to_send_to(recipient, members)
 
 
-def safelisted_members(service, key_type, allow_safelisted_recipients=True):
+def safelisted_members(service, key_type, is_simulated=False, allow_safelisted_recipients=True):
     if key_type == KEY_TYPE_TEST:
         return None
 
@@ -41,7 +47,14 @@ def safelisted_members(service, key_type, allow_safelisted_recipients=True):
         return None
 
     team_members = itertools.chain.from_iterable([user.mobile_number, user.email_address] for user in service.users)
-    safelist_members = [member.recipient for member in service.safelist if allow_safelisted_recipients]
+    safelist_members = []
+
+    if is_simulated:
+        safelist_members = itertools.chain.from_iterable(
+            [current_app.config["SIMULATED_SMS_NUMBERS"], current_app.config["SIMULATED_EMAIL_ADDRESSES"]]
+        )
+    else:
+        safelist_members = [member.recipient for member in service.safelist if allow_safelisted_recipients]
 
     if (key_type == KEY_TYPE_NORMAL and service.restricted) or (key_type == KEY_TYPE_TEAM):
         return itertools.chain(team_members, safelist_members)

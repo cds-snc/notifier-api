@@ -1,8 +1,8 @@
 from functools import cached_property, partial
 from typing import Any, Optional
 
+import greenlet  # type: ignore
 import sqlalchemy.types as types
-from flask import _app_ctx_stack  # type: ignore
 from flask_sqlalchemy import BaseQuery, SignallingSession, SQLAlchemy, get_state
 from sqlalchemy import orm
 
@@ -76,7 +76,6 @@ class RoutingSQLAlchemy(SQLAlchemy):
 
     def create_scoped_session(self, options=None):
         options = options or {}
-        scopefunc = options.pop("scopefunc", _app_ctx_stack.__ident_func__)
         options.setdefault("query_cls", BaseQuery)
 
-        return orm.scoped_session(partial(ExplicitRoutingSession, self, **options), scopefunc=scopefunc)
+        return orm.scoped_session(partial(ExplicitRoutingSession, self, **options), scopefunc=greenlet.getcurrent)

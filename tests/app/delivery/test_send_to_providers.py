@@ -10,6 +10,7 @@ from requests import HTTPError
 
 import app
 from app import aws_sns_client
+from app.config import Config
 from app.dao import notifications_dao, provider_details_dao
 from app.dao.provider_details_dao import (
     dao_switch_sms_provider_to_provider_with_identifier,
@@ -277,6 +278,24 @@ def test_should_not_send_sms_message_when_message_is_empty_or_whitespace(sample_
 
     send_mock.assert_not_called()
     assert Notification.query.get(notification.id).status == "technical-failure"
+
+
+def test_should_not_send_sms_message_to_internal_test_number(sample_service, mocker):
+    template = create_template(sample_service)
+    notification = save_notification(
+        create_notification(
+            template=template,
+            to_field=Config.INTERNAL_TEST_NUMBER,
+            status="created",
+            reply_to_text=sample_service.get_default_sms_sender(),
+        )
+    )
+    mocker.patch("app.delivery.send_to_providers.send_sms_response", return_value="reference")
+    send_mock = mocker.patch("app.aws_sns_client.send_sms")
+    send_to_providers.send_sms_to_provider(notification)
+
+    send_mock.assert_not_called()
+    assert Notification.query.get(notification.id).status == "sent"
 
 
 def test_send_sms_should_use_template_version_from_notification_not_latest(sample_template, mocker):

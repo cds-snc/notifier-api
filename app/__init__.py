@@ -47,6 +47,7 @@ signer = CryptoSigner()
 zendesk_client = ZendeskClient()
 statsd_client = StatsdClient()
 flask_redis = FlaskRedis()
+flask_redis_publish = FlaskRedis(config_prefix="REDIS_PUBLISH")
 redis_store = RedisClient()
 metrics_logger = MetricsLogger()
 # TODO: Rework instantiation to decouple redis_store.redis_store and pass it in.\
@@ -66,6 +67,13 @@ sms_priority = RedisQueue("sms", process_type="priority")
 email_bulk = RedisQueue("email", process_type="bulk")
 email_normal = RedisQueue("email", process_type="normal")
 email_priority = RedisQueue("email", process_type="priority")
+
+sms_bulk_publish = RedisQueue("sms", process_type="bulk")
+sms_normal_publish = RedisQueue("sms", process_type="normal")
+sms_priority_publish = RedisQueue("sms", process_type="priority")
+email_bulk_publish = RedisQueue("email", process_type="bulk")
+email_normal_publish = RedisQueue("email", process_type="normal")
+email_priority_publish = RedisQueue("email", process_type="priority")
 
 
 def create_app(application, config=None):
@@ -97,7 +105,15 @@ def create_app(application, config=None):
     clients.init_app(sms_clients=[aws_sns_client], email_clients=[aws_ses_client])
 
     flask_redis.init_app(application)
+    flask_redis_publish.init_app(application)
     redis_store.init_app(application)
+
+    sms_bulk_publish.init_app(flask_redis_publish, metrics_logger)
+    sms_normal_publish.init_app(flask_redis_publish, metrics_logger)
+    sms_priority_publish.init_app(flask_redis_publish, metrics_logger)
+    email_bulk_publish.init_app(flask_redis_publish, metrics_logger)
+    email_normal_publish.init_app(flask_redis_publish, metrics_logger)
+    email_priority_publish.init_app(flask_redis_publish, metrics_logger)
 
     sms_bulk.init_app(flask_redis, metrics_logger)
     sms_normal.init_app(flask_redis, metrics_logger)
@@ -237,30 +253,26 @@ def register_v2_blueprints(application):
     from app.v2.inbound_sms.get_inbound_sms import (
         v2_inbound_sms_blueprint as get_inbound_sms,
     )
-    from app.v2.notifications.get_notifications import (
-        v2_notification_blueprint as get_notifications,
+    from app.v2.notifications import (  # noqa
+        get_notifications,
+        post_notifications,
+        v2_notification_blueprint,
     )
-    from app.v2.notifications.post_notifications import (
-        v2_notification_blueprint as post_notifications,
+    from app.v2.template import (  # noqa
+        get_template,
+        post_template,
+        v2_template_blueprint,
     )
-    from app.v2.template.get_template import v2_template_blueprint as get_template
-    from app.v2.template.post_template import v2_template_blueprint as post_template
     from app.v2.templates.get_templates import v2_templates_blueprint as get_templates
 
-    post_notifications.before_request(requires_auth)
-    application.register_blueprint(post_notifications)
-
-    get_notifications.before_request(requires_auth)
-    application.register_blueprint(get_notifications)
+    v2_notification_blueprint.before_request(requires_auth)
+    application.register_blueprint(v2_notification_blueprint)
 
     get_templates.before_request(requires_auth)
     application.register_blueprint(get_templates)
 
-    get_template.before_request(requires_auth)
-    application.register_blueprint(get_template)
-
-    post_template.before_request(requires_auth)
-    application.register_blueprint(post_template)
+    v2_template_blueprint.before_request(requires_auth)
+    application.register_blueprint(v2_template_blueprint)
 
     get_inbound_sms.before_request(requires_auth)
     application.register_blueprint(get_inbound_sms)

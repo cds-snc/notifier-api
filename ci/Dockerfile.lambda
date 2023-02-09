@@ -1,6 +1,6 @@
-FROM python:3.9-alpine3.13@sha256:a7cbd1e7784a35a098cedbc8681b790d35ff6030a5e13f043185e2465003a040
+FROM python:3.10-alpine3.16@sha256:923d30cb18f3d67160cb055a3c3862771edc5d07c63d54d9ca144954c3a6bdfe
 
-ENV PYTHONPATH "${PYTHONPATH}:/opt/python/lib/python3.9/site-packages"
+ENV PYTHONPATH "${PYTHONPATH}:/opt/python/lib/python3.10/site-packages"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV TASK_ROOT /app
 
@@ -40,4 +40,4 @@ ENTRYPOINT [ "/entry.sh" ]
 
 # Launch the New Relic lambda wrapper which will then launch the app
 # handler defined in the NEW_RELIC_LAMBDA_HANDLER environment variable
-CMD [ "newrelic_lambda_wrapper.handler" ] 
+CMD [ "newrelic_lambda_wrapper.handler" ]

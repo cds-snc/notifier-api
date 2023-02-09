@@ -83,17 +83,20 @@ class Freshdesk(object):
             if not api_url:
                 raise NotImplementedError
 
-            # The API and field definitions are defined here:
-            # https://developer.zendesk.com/rest_api/docs/support/tickets
-            response = requests.post(
-                urljoin(api_url, "/api/v2/tickets"),
-                json=self._generate_ticket(),
-                auth=HTTPBasicAuth(current_app.config["FRESH_DESK_API_KEY"], "x"),
-                timeout=5,
-            )
-            response.raise_for_status()
+            if current_app.config["FRESH_DESK_ENABLED"] is True:
+                # The API and field definitions are defined here:
+                # https://developer.zendesk.com/rest_api/docs/support/tickets
+                response = requests.post(
+                    urljoin(api_url, "/api/v2/tickets"),
+                    json=self._generate_ticket(),
+                    auth=HTTPBasicAuth(current_app.config["FRESH_DESK_API_KEY"], "x"),
+                    timeout=5,
+                )
+                response.raise_for_status()
 
-            return response.status_code
+                return response.status_code
+            else:
+                return 201
         except requests.RequestException as e:
             content = json.loads(response.content)
             current_app.logger.error(f"Failed to create Freshdesk ticket: {content['errors']}")

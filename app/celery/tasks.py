@@ -76,6 +76,12 @@ from app.notifications.process_notifications import (
 from app.notifications.validators import check_service_over_daily_message_limit
 from app.types import VerifiedNotification
 from app.utils import get_csv_max_rows
+from app.v2.errors import (
+    LiveServiceTooManyRequestsError,
+    LiveServiceTooManySMSRequestsError,
+    TrialServiceTooManyRequestsError,
+    TrialServiceTooManySMSRequestsError,
+)
 
 
 @notify_celery.task(name="process-job")
@@ -294,24 +300,25 @@ def save_smss(self, service_id: Optional[str], signed_notifications: List[Signed
         signed_and_verified = list(zip(signed_notifications, verified_notifications))
         handle_batch_error_and_forward(self, signed_and_verified, SMS_TYPE, e, receipt, template)
 
-    # we should move this check inside the for loop below
-    check_service_over_daily_message_limit(KEY_TYPE_NORMAL, service)
     current_app.logger.info(f"Sending following sms notifications to AWS: {notification_id_queue.keys()}")
     for notification_obj in saved_notifications:
-        queue = notification_id_queue.get(notification_obj.id) or template.queue_to_use()  # type: ignore
-        send_notification_to_queue(
-            notification_obj,
-            service.research_mode,
-            queue=queue,
-        )
-
-        current_app.logger.debug(
-            "SMS {} created at {} for job {}".format(
-                notification_obj.id,
-                notification_obj.created_at,
-                notification_obj.job,
+        try:
+            check_service_over_daily_message_limit(notification_obj.key_type, service)
+            queue = notification_id_queue.get(notification_obj.id) or template.queue_to_use()  # type: ignore
+            send_notification_to_queue(
+                notification_obj,
+                service.research_mode,
+                queue=queue,
             )
-        )
+            current_app.logger.debug(
+                "SMS {} created at {} for job {}".format(
+                    notification_obj.id,
+                    notification_obj.created_at,
+                    notification_obj.job,
+                )
+            )
+        except (LiveServiceTooManySMSRequestsError, TrialServiceTooManySMSRequestsError) as e:
+            current_app.logger.info(f"{e.message}: SMS {notification_obj.id} not created")
 
 
 @notify_celery.task(bind=True, name="save-emails", max_retries=5, default_retry_delay=300)
@@ -407,14 +414,23 @@ def save_emails(self, _service_id: Optional[str], signed_notifications: List[Sig
         handle_batch_error_and_forward(self, signed_and_verified, EMAIL_TYPE, e, receipt, template)
 
     if saved_notifications:
-        current_app.logger.info(f"Sending following email notifications to AWS: {notification_id_queue.keys()}")
-        # todo: fix this potential bug
-        # service is whatever it was set to last in the for loop above.
-        # at this point in the code we have a list of notifications (saved_notifications)
-        # which could be from multiple services
-        check_service_over_daily_message_limit(KEY_TYPE_NORMAL, service)
-        research_mode = service.research_mode  # type: ignore
-        for notification_obj in saved_notifications:
+        try_to_send_notifications_to_queue(notification_id_queue, service, saved_notifications, template)
+
+
+def try_to_send_notifications_to_queue(notification_id_queue, service, saved_notifications, template):
+    """
+    Loop through saved_notifications, check if the service has hit their daily rate limit,
+    and if not, call send_notification_to_queue on notification
+    """
+    current_app.logger.info(f"Sending following email notifications to AWS: {notification_id_queue.keys()}")
+    # todo: fix this potential bug
+    # service is whatever it was set to last in the for loop above.
+    # at this point in the code we have a list of notifications (saved_notifications)
+    # which could be from multiple services
+    research_mode = service.research_mode  # type: ignore
+    for notification_obj in saved_notifications:
+        try:
+            check_service_over_daily_message_limit(notification_obj.key_type, service)
             queue = notification_id_queue.get(notification_obj.id) or template.queue_to_use()  # type: ignore
             send_notification_to_queue(
                 notification_obj,
@@ -429,6 +445,8 @@ def save_emails(self, _service_id: Optional[str], signed_notifications: List[Sig
                     notification_obj.job,
                 )
             )
+        except (LiveServiceTooManyRequestsError, TrialServiceTooManyRequestsError) as e:
+            current_app.logger.info(f"{e.message}: Email {notification_obj.id} not created")
 
 
 def handle_batch_error_and_forward(
@@ -664,6 +682,11 @@ def queue_to_use(notifications_count: int) -> Optional[str]:
 @notify_celery.task(bind=True, name="send-notify-no-reply", max_retries=5)
 @statsd(namespace="tasks")
 def send_notify_no_reply(self, data):
+    """Sends no-reply emails to people replying back to GCNotify.
+
+    This task will be fed by the AWS lambda code ses_receiving_emails.
+    https://github.com/cds-snc/notification-lambdas/blob/fd508d9718cef715f9297fedd8d780bc4bae0051/sesreceivingemails/ses_receiving_emails.py
+    """
     payload = json.loads(data)
 
     service = dao_fetch_service_by_id(current_app.config["NOTIFY_SERVICE_ID"])

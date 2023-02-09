@@ -2,7 +2,7 @@ version: '3'
 
 services:
   dev:
-    build: 
+    build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     environment:
@@ -10,19 +10,19 @@ services:
       SQLALCHEMY_DATABASE_TEST_URI: postgresql://postgres:chummy@db/test_notification_api
       REDIS_URL: redis://redis:6380
     volumes:
-      - ..:/workspace:cached   
+      - ..:/workspace:cached
     command: sleep infinity
-    ports: 
+    ports:
       - 8000:8000
       - 8001:8001
       - 6011:6011
-    links: 
+    links:
       - db
 
   db:
-    image: postgres:13.4@sha256:1adb50e5c24f550a9e68457a2ce60e9e4103dfc43c3b36e98310168165b443a1
+    image: postgres:13.9@sha256:090485c533979ecac0d88bb8ba845baebf17ad86bb4cc04b72a81ff7dee461e0
     volumes:
-    - ./initdb:/docker-entrypoint-initdb.d
+      - ./initdb:/docker-entrypoint-initdb.d
     restart: always
     command:
       - "postgres"
@@ -33,12 +33,12 @@ services:
       POSTGRES_PASSWORD: chummy
       POSTGRES_HOST_AUTH_METHOD: trust
     expose:
-      - "5432" 
+      - "5432"
     ports:
       - "5432:5432"
 
   redis:
-    image: redis:6.2@sha256:3aba2a761e87edae1e8020baf7f3df77c62a2879752d2c62c2f7192c39d9eb20
+    image: redis:6.2@sha256:8cf5e722ac88a9fbc03aa9f3e66767d88f809596746a2d35b3e73b7cdfbf0870
     restart: always
     command: redis-server --port 6380
     ports:

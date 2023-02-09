@@ -1,8 +1,8 @@
 import base64
 import json
+from unittest import mock
 from uuid import UUID
 
-import mock
 import pytest
 from fido2 import cbor
 from flask import url_for

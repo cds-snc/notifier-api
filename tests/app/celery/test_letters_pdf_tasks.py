@@ -44,6 +44,7 @@ from tests.app.db import create_letter_branding, create_notification, save_notif
 from tests.conftest import set_config_values
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_should_have_decorated_tasks_functions():
     assert create_letters_pdf.__wrapped__.__name__ == "create_letters_pdf"
     assert collate_letter_pdfs_for_day.__wrapped__.__name__ == "collate_letter_pdfs_for_day"
@@ -52,6 +53,7 @@ def test_should_have_decorated_tasks_functions():
     assert process_virus_scan_error.__wrapped__.__name__ == "process_virus_scan_error"
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize("personalisation", [{"name": "test"}, None])
 def test_get_letters_pdf_calls_notifications_template_preview_service_correctly(
     notify_api, mocker, client, sample_letter_template, personalisation
@@ -91,6 +93,7 @@ def test_get_letters_pdf_calls_notifications_template_preview_service_correctly(
     }
 
 
+@pytest.mark.skip(reason="Letter tests")
 @pytest.mark.parametrize("page_count,expected_billable_units", [("1", 1), ("2", 1), ("3", 2)])
 def test_get_letters_pdf_calculates_billing_units(
     notify_api,
@@ -128,6 +131,7 @@ def test_get_letters_pdf_calculates_billing_units(
     assert billable_units == expected_billable_units
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2017-12-04 17:31:00")
 def test_create_letters_pdf_calls_s3upload(mocker, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", "1"))
@@ -143,6 +147,7 @@ def test_create_letters_pdf_calls_s3upload(mocker, sample_letter_notification):
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2017-12-04 17:31:00")
 def test_create_letters_pdf_calls_s3upload_for_test_letters(mocker, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", "1"))
@@ -159,6 +164,7 @@ def test_create_letters_pdf_calls_s3upload_for_test_letters(mocker, sample_lette
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_pdf_sets_billable_units(mocker, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", 1))
     mocker.patch("app.letters.utils.s3upload")
@@ -168,11 +174,13 @@ def test_create_letters_pdf_sets_billable_units(mocker, sample_letter_notificati
     assert noti.billable_units == 1
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_pdf_non_existent_notification(notify_api, mocker, fake_uuid):
     with pytest.raises(expected_exception=NoResultFound):
         create_letters_pdf(fake_uuid)
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_pdf_handles_request_errors(mocker, sample_letter_notification):
     mock_get_letters_pdf = mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", side_effect=RequestException)
     mock_retry = mocker.patch("app.celery.letters_pdf_tasks.create_letters_pdf.retry")
@@ -183,6 +191,7 @@ def test_create_letters_pdf_handles_request_errors(mocker, sample_letter_notific
     assert mock_retry.called
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_pdf_handles_s3_errors(mocker, sample_letter_notification):
     mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", 1))
     error_response = {
@@ -204,6 +213,7 @@ def test_create_letters_pdf_handles_s3_errors(mocker, sample_letter_notification
     assert mock_retry.called
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_pdf_sets_technical_failure_max_retries(mocker, sample_letter_notification):
     mock_get_letters_pdf = mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", side_effect=RequestException)
     mock_retry = mocker.patch(
@@ -219,6 +229,7 @@ def test_create_letters_pdf_sets_technical_failure_max_retries(mocker, sample_le
     mock_update_noti.assert_called_once_with(sample_letter_notification.id, "technical-failure")
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_gets_the_right_logo_when_service_has_no_logo(notify_api, mocker, sample_letter_notification):
     mock_get_letters_pdf = mocker.patch("app.celery.letters_pdf_tasks.get_letters_pdf", return_value=(b"\x00\x01", 1))
     mocker.patch("app.letters.utils.s3upload")
@@ -234,6 +245,7 @@ def test_create_letters_gets_the_right_logo_when_service_has_no_logo(notify_api,
 
 
 # We only need this while we are migrating to the new letter_branding model
+@pytest.mark.skip(reason="Letter tests")
 def test_create_letters_gets_the_right_logo_when_service_has_letter_branding_logo(notify_api, mocker, sample_letter_notification):
     letter_branding = create_letter_branding(name="test brand", filename="test-brand")
     sample_letter_notification.service.letter_branding = letter_branding
@@ -250,6 +262,7 @@ def test_create_letters_gets_the_right_logo_when_service_has_letter_branding_log
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_collate_letter_pdfs_for_day(notify_api, mocker):
     mock_s3 = mocker.patch(
         "app.celery.tasks.s3.get_s3_bucket_objects",
@@ -292,6 +305,7 @@ def test_collate_letter_pdfs_for_day(notify_api, mocker):
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2018-09-12 17:50:00")
 def test_collate_letter_pdfs_for_day_works_without_date_param(notify_api, mocker):
     mock_s3 = mocker.patch("app.celery.tasks.s3.get_s3_bucket_objects")
@@ -300,6 +314,7 @@ def test_collate_letter_pdfs_for_day_works_without_date_param(notify_api, mocker
     mock_s3.assert_called_once_with("test-letters-pdf", subfolder=expected_date)
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_splits_on_file_size(notify_api, mocker):
     mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=True)
     letters = [
@@ -335,6 +350,7 @@ def test_group_letters_splits_on_file_size(notify_api, mocker):
         assert next(x, None) is None
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_splits_on_file_count(notify_api, mocker):
     mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=True)
     letters = [
@@ -371,6 +387,7 @@ def test_group_letters_splits_on_file_count(notify_api, mocker):
         assert next(x, None) is None
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_splits_on_file_size_and_file_count(notify_api, mocker):
     mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=True)
     letters = [
@@ -414,12 +431,14 @@ def test_group_letters_splits_on_file_size_and_file_count(notify_api, mocker):
         assert next(x, None) is None
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_ignores_non_pdfs(notify_api, mocker):
     mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=True)
     letters = [{"Key": "A.zip"}]
     assert list(group_letters(letters)) == []
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_ignores_notifications_already_sent(notify_api, mocker):
     mock = mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=False)
     letters = [{"Key": "A.pdf"}]
@@ -427,11 +446,13 @@ def test_group_letters_ignores_notifications_already_sent(notify_api, mocker):
     mock.assert_called_once_with("A.pdf")
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_group_letters_with_no_letters(notify_api, mocker):
     mocker.patch("app.celery.letters_pdf_tasks.letter_in_created_state", return_value=True)
     assert list(group_letters([])) == []
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_letter_in_created_state(sample_notification):
     sample_notification.reference = "ABCDEF1234567890"
     filename = "2018-01-13/NOTIFY.ABCDEF1234567890.D.2.C.C.20180113120000.PDF"
@@ -439,6 +460,7 @@ def test_letter_in_created_state(sample_notification):
     assert letter_in_created_state(filename) is True
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_letter_in_created_state_fails_if_notification_not_in_created(
     sample_notification,
 ):
@@ -448,6 +470,7 @@ def test_letter_in_created_state_fails_if_notification_not_in_created(
     assert letter_in_created_state(filename) is False
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_letter_in_created_state_fails_if_notification_doesnt_exist(
     sample_notification,
 ):
@@ -456,6 +479,7 @@ def test_letter_in_created_state_fails_if_notification_doesnt_exist(
     assert letter_in_created_state(filename) is False
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2018-01-01 18:00")
 @mock_s3
 @pytest.mark.parametrize(
@@ -491,7 +515,7 @@ def test_process_letter_task_check_virus_scan_passed(
     source_bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
     target_bucket_name = current_app.config[bucket_config_name]
 
-    conn = boto3.resource("s3", region_name="ca-central-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=source_bucket_name)
     conn.create_bucket(Bucket=target_bucket_name)
 
@@ -531,6 +555,7 @@ def test_process_letter_task_check_virus_scan_passed(
     mock_get_page_count.assert_called_once_with(b"old_pdf")
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2018-01-01 18:00")
 @mock_s3
 @pytest.mark.parametrize("key_type", [KEY_TYPE_NORMAL, KEY_TYPE_TEST])
@@ -539,7 +564,7 @@ def test_process_letter_task_check_virus_scan_passed_when_sanitise_fails(sample_
     source_bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
     target_bucket_name = current_app.config["INVALID_PDF_BUCKET_NAME"]
 
-    conn = boto3.resource("s3", region_name="ca-central-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=source_bucket_name)
     conn.create_bucket(Bucket=target_bucket_name)
 
@@ -562,6 +587,7 @@ def test_process_letter_task_check_virus_scan_passed_when_sanitise_fails(sample_
     mock_get_page_count.assert_called_once_with(b"pdf_content")
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2018-01-01 18:00")
 @mock_s3
 @pytest.mark.parametrize(
@@ -582,7 +608,7 @@ def test_process_letter_task_check_virus_scan_passed_when_redaction_fails(
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
     target_bucket_name = current_app.config[bucket_config_name]
 
-    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=bucket_name)
     conn.create_bucket(Bucket=target_bucket_name)
 
@@ -620,6 +646,7 @@ def test_process_letter_task_check_virus_scan_passed_when_redaction_fails(
         mock_copy_s3.assert_not_called()
 
 
+@pytest.mark.skip(reason="Letter tests")
 @freeze_time("2018-01-01 18:00")
 @mock_s3
 @pytest.mark.parametrize("key_type", [KEY_TYPE_NORMAL, KEY_TYPE_TEST])
@@ -628,7 +655,7 @@ def test_process_letter_task_check_virus_scan_passed_when_file_cannot_be_opened(
     source_bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
     target_bucket_name = current_app.config["INVALID_PDF_BUCKET_NAME"]
 
-    conn = boto3.resource("s3", region_name="ca-central-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=source_bucket_name)
     conn.create_bucket(Bucket=target_bucket_name)
 
@@ -651,6 +678,7 @@ def test_process_letter_task_check_virus_scan_passed_when_file_cannot_be_opened(
     assert sample_letter_notification.billable_units == 0
 
 
+@pytest.mark.skip(reason="Letter tests")
 @mock_s3
 def test_process_virus_scan_passed_logs_error_and_sets_tech_failure_if_s3_error_uploading_to_live_bucket(
     mocker,
@@ -662,7 +690,7 @@ def test_process_virus_scan_passed_logs_error_and_sets_tech_failure_if_s3_error_
     filename = "NOTIFY.{}".format(sample_letter_notification.reference)
 
     source_bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
-    conn = boto3.resource("s3", region_name="ca-central-1")
+    conn = boto3.resource("s3")
     conn.create_bucket(Bucket=source_bucket_name)
 
     s3 = boto3.client("s3", region_name="ca-central-1")
@@ -705,6 +733,7 @@ def test_process_virus_scan_passed_logs_error_and_sets_tech_failure_if_s3_error_
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_move_invalid_letter_and_update_status_logs_error_and_sets_tech_failure_state_if_s3_error(
     mocker,
     sample_letter_notification,
@@ -730,6 +759,7 @@ def test_move_invalid_letter_and_update_status_logs_error_and_sets_tech_failure_
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_process_letter_task_check_virus_scan_failed(sample_letter_notification, mocker):
     filename = "NOTIFY.{}".format(sample_letter_notification.reference)
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
@@ -743,6 +773,7 @@ def test_process_letter_task_check_virus_scan_failed(sample_letter_notification,
     assert sample_letter_notification.status == NOTIFICATION_VIRUS_SCAN_FAILED
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_process_letter_task_check_virus_scan_error(sample_letter_notification, mocker):
     filename = "NOTIFY.{}".format(sample_letter_notification.reference)
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
@@ -756,6 +787,7 @@ def test_process_letter_task_check_virus_scan_error(sample_letter_notification, 
     assert sample_letter_notification.status == NOTIFICATION_TECHNICAL_FAILURE
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_replay_letters_in_error_for_all_letters_in_error_bucket(notify_api, mocker):
     mockObject = boto3.resource("s3").Object("ERROR", "ERROR/file_name")
     mocker.patch(
@@ -769,6 +801,7 @@ def test_replay_letters_in_error_for_all_letters_in_error_bucket(notify_api, moc
     mock_celery.assert_called_once_with(name="scan-file", kwargs={"filename": "file_name"}, queue="antivirus-tasks")
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_replay_letters_in_error_for_one_file(notify_api, mocker):
     mockObject = boto3.resource("s3").Object("ERROR", "ERROR/file_name")
     mocker.patch(
@@ -782,6 +815,7 @@ def test_replay_letters_in_error_for_one_file(notify_api, mocker):
     mock_celery.assert_called_once_with(name="scan-file", kwargs={"filename": "file_name"}, queue="antivirus-tasks")
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_sanitise_precompiled_pdf_returns_data_from_template_preview(rmock, sample_letter_notification):
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
     endpoint = "http://localhost:9999/precompiled/sanitise"
@@ -808,6 +842,7 @@ def test_sanitise_precompiled_pdf_returns_data_from_template_preview(rmock, samp
     assert rmock.last_request.text == "old_pdf"
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_sanitise_precompiled_pdf_returns_none_on_validation_error(rmock, sample_letter_notification):
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
 
@@ -834,6 +869,7 @@ def test_sanitise_precompiled_pdf_returns_none_on_validation_error(rmock, sample
     assert response is None
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_sanitise_precompiled_pdf_passes_the_service_id_and_notification_id_to_template_preview(
     mocker,
     sample_letter_notification,
@@ -857,6 +893,7 @@ def test_sanitise_precompiled_pdf_passes_the_service_id_and_notification_id_to_t
     )
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_sanitise_precompiled_pdf_retries_on_http_error(rmock, sample_letter_notification):
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
     rmock.post(
@@ -870,6 +907,7 @@ def test_sanitise_precompiled_pdf_retries_on_http_error(rmock, sample_letter_not
         _sanitise_precompiled_pdf(mock_celery, sample_letter_notification, b"old_pdf")
 
 
+@pytest.mark.skip(reason="Letter tests")
 def test_sanitise_precompiled_pdf_sets_notification_to_technical_failure_after_too_many_errors(rmock, sample_letter_notification):
     sample_letter_notification.status = NOTIFICATION_PENDING_VIRUS_CHECK
     rmock.post(

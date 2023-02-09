@@ -17,6 +17,15 @@ def json_data(email_address: str, template_id: str, ref: str, personalisation: O
     }
 
 
+def json_data_sms(phone_number: str, template_id: str, ref: str, personalisation: Optional[dict] = {}):
+    return {
+        "reference": f"{datetime.utcnow().isoformat()} {ref}",
+        "phone_number": phone_number,
+        "template_id": template_id,
+        "personalisation": personalisation,
+    }
+
+
 def rows_to_csv(rows: List[List[str]]):
     output = StringIO()
     writer = csv.writer(output)

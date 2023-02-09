@@ -10,6 +10,7 @@ from app.dbsetup import RoutingSQLAlchemy
 from app.models import (
     EMAIL_TYPE,
     INTERNATIONAL_SMS_TYPE,
+    KEY_TYPE_TEAM,
     LETTER_TYPE,
     SMS_TYPE,
     ApiKeyType,
@@ -380,6 +381,12 @@ def test_service_can_send_to_recipient_passes_for_safelisted_recipient_passes(no
     assert service_can_send_to_recipient("6502532222", "team", sample_service) is None
 
 
+def test_service_can_send_to_recipient_passes_for_simulated_recipients(notify_db, notify_db_session):
+    live_service = create_sample_service(notify_db, notify_db_session, service_name="live", restricted=False)
+    assert service_can_send_to_recipient(current_app.config["SIMULATED_EMAIL_ADDRESSES"][0], KEY_TYPE_TEAM, live_service) is None
+    assert service_can_send_to_recipient(current_app.config["SIMULATED_SMS_NUMBERS"][0], KEY_TYPE_TEAM, live_service) is None
+
+
 @pytest.mark.parametrize(
     "recipient",
     [
@@ -403,7 +410,7 @@ def test_service_can_send_to_recipient_fails_when_ignoring_safelist(
         )
     assert exec_info.value.status_code == 400
     assert (
-        exec_info.value.message == "Can’t send to this recipient using a team-only API key "
+        exec_info.value.message == f"Can’t send to this recipient using a team-only API key (service {sample_service.id}) "
         f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
     )
     assert exec_info.value.fields == []
@@ -413,7 +420,7 @@ def test_service_can_send_to_recipient_fails_when_ignoring_safelist(
 @pytest.mark.parametrize(
     "key_type, error_message",
     [
-        ("team", "Can’t send to this recipient using a team-only API key - see"),
+        ("team", "Can’t send to this recipient using a team-only API key"),
         ("normal", "Can’t send to this recipient when service is in trial mode – see "),
     ],
 )  # noqa
@@ -438,7 +445,7 @@ def test_service_can_send_to_recipient_fails_when_mobile_number_is_not_on_team(n
         service_can_send_to_recipient("0758964221", "team", live_service)
     assert e.value.status_code == 400
     assert (
-        e.value.message == "Can’t send to this recipient using a team-only API key "
+        e.value.message == f"Can’t send to this recipient using a team-only API key (service {live_service.id}) "
         f'- see {get_document_url("en", "keys.html#team-and-safelist")}'
     )
     assert e.value.fields == []
@@ -446,13 +453,29 @@ def test_service_can_send_to_recipient_fails_when_mobile_number_is_not_on_team(n
 
 @pytest.mark.parametrize("char_count", [612, 0, 494, 200])
 def test_check_sms_content_char_count_passes(char_count, notify_api):
-    assert check_sms_content_char_count(char_count) is None
+    assert check_sms_content_char_count(char_count, "", False) is None
 
 
 @pytest.mark.parametrize("char_count", [613, 700, 6000])
 def test_check_sms_content_char_count_fails(char_count, notify_api):
     with pytest.raises(BadRequestError) as e:
-        check_sms_content_char_count(char_count)
+        check_sms_content_char_count(char_count, "", False)
+    assert e.value.status_code == 400
+    assert e.value.message == "Content for template has a character count greater than the limit of {}".format(
+        SMS_CHAR_COUNT_LIMIT
+    )
+    assert e.value.fields == []
+
+
+@pytest.mark.parametrize("char_count", [603, 0, 494, 200])
+def test_check_sms_content_char_count_passes_with_svc_name(char_count, notify_api):
+    assert check_sms_content_char_count(char_count, "service", True) is None
+
+
+@pytest.mark.parametrize("char_count", [606, 700, 6000])
+def test_check_sms_content_char_count_fails_with_svc_name(char_count, notify_api):
+    with pytest.raises(BadRequestError) as e:
+        check_sms_content_char_count(char_count, "service", True)
     assert e.value.status_code == 400
     assert e.value.message == "Content for template has a character count greater than the limit of {}".format(
         SMS_CHAR_COUNT_LIMIT

@@ -17,14 +17,14 @@ from app import (
     authenticated_service,
     create_uuid,
     document_download_client,
-    email_bulk,
-    email_normal,
-    email_priority,
+    email_bulk_publish,
+    email_normal_publish,
+    email_priority_publish,
     notify_celery,
     signer,
-    sms_bulk,
-    sms_normal,
-    sms_priority,
+    sms_bulk_publish,
+    sms_normal_publish,
+    sms_priority_publish,
     statsd_client,
 )
 from app.aws.s3 import upload_job_to_s3
@@ -182,8 +182,30 @@ def post_bulk():
 
     check_for_csv_errors(recipient_csv, max_rows, remaining_messages)
 
+    for row in recipient_csv.get_rows():
+        try:
+            validate_template(template.id, row.personalisation, authenticated_service, template.template_type)
+        except BadRequestError as e:
+            message = e.message + ". Notification to {} on row #{} exceeds the maximum size limit.".format(
+                row.recipient, row.index + 1
+            )
+            raise BadRequestError(message=message)
+
     if template.template_type == SMS_TYPE:
-        check_sms_limit_increment_redis_send_warnings_if_needed(authenticated_service, recipient_csv.sms_fragment_count)
+        # calculate the number of simulated recipients
+        numberOfSimulated = sum(
+            simulated_recipient(i["phone_number"].data, template.template_type) for i in list(recipient_csv.get_rows())
+        )
+        mixedRecipients = numberOfSimulated > 0 and numberOfSimulated != len(list(recipient_csv.get_rows()))
+
+        # if its a live or a team key, and they have specified testing and NON-testing recipients, raise an error
+        if api_user.key_type != KEY_TYPE_TEST and mixedRecipients:
+            raise BadRequestError(message="Bulk sending to testing and non-testing numbers is not supported", status_code=400)
+
+        is_test_notification = api_user.key_type == KEY_TYPE_TEST or len(list(recipient_csv.get_rows())) == numberOfSimulated
+
+        if not is_test_notification:
+            check_sms_limit_increment_redis_send_warnings_if_needed(authenticated_service, recipient_csv.sms_fragment_count)
 
     job = create_bulk_job(authenticated_service, api_user, template, form, recipient_csv)
 
@@ -225,7 +247,9 @@ def post_notification(notification_type: NotificationType):
     )
 
     if template.template_type == SMS_TYPE:
-        check_sms_limit_increment_redis_send_warnings_if_needed(authenticated_service, template_with_content.fragment_count)
+        is_test_notification = api_user.key_type == KEY_TYPE_TEST or simulated_recipient(form["phone_number"], notification_type)
+        if not is_test_notification:
+            check_sms_limit_increment_redis_send_warnings_if_needed(authenticated_service, template_with_content.fragment_count)
 
     current_app.logger.info(f"Trying to send notification for Template ID: {template.id}")
 
@@ -290,18 +314,18 @@ def triage_notification_to_queues(notification_type: NotificationType, signed_no
     """
     if notification_type == SMS_TYPE:
         if template.process_type == PRIORITY:
-            sms_priority.publish(signed_notification_data)
+            sms_priority_publish.publish(signed_notification_data)
         elif template.process_type == NORMAL:
-            sms_normal.publish(signed_notification_data)
+            sms_normal_publish.publish(signed_notification_data)
         elif template.process_type == BULK:
-            sms_bulk.publish(signed_notification_data)
+            sms_bulk_publish.publish(signed_notification_data)
     elif notification_type == EMAIL_TYPE:
         if template.process_type == PRIORITY:
-            email_priority.publish(signed_notification_data)
+            email_priority_publish.publish(signed_notification_data)
         elif template.process_type == NORMAL:
-            email_normal.publish(signed_notification_data)
+            email_normal_publish.publish(signed_notification_data)
         elif template.process_type == BULK:
-            email_bulk.publish(signed_notification_data)
+            email_bulk_publish.publish(signed_notification_data)
 
 
 def process_sms_or_email_notification(

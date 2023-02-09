@@ -10,10 +10,10 @@ jobs:
       - name: Install libcurl
         run: sudo apt-get update && sudo apt-get install libssl-dev libcurl4-openssl-dev
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4.3.0
         with:
-          python-version: 3.9
+          python-version: '3.10'
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
       - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3.0.11

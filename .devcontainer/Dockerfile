@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.9@sha256:30cd5aa1d4c9b36e29676034ae9690ebaab1611eca39146a5e9a058b382992a7
+FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.10
 
 ARG KUBENS_VERSION="0.9.4"
 ARG OCTANT_VERSION="0.25.1"
@@ -6,28 +6,28 @@ ARG OCTANT_VERSION="0.25.1"
 # Install packages
 RUN apt-get update \
     && apt-get -y install --no-install-recommends \
-        apt-utils \
-        postgresql-client \
-        2>&1 \
+    apt-utils \
+    postgresql-client \
+    2>&1 \
     && apt-get -y install \
-        curl \
-        emacs \
-        exa \
-        fd-find \
-        git \
-        iproute2 \
-        less \
-        libsodium-dev \
-        lsb-release \
-        man-db \
-        manpages \
-        net-tools \
-        openssh-client \
-        procps \
-        sudo \
-        tldr \
-        unzip \
-        vim \
+    curl \
+    emacs \
+    exa \
+    fd-find \
+    git \
+    iproute2 \
+    less \
+    libsodium-dev \
+    lsb-release \
+    man-db \
+    manpages \
+    net-tools \
+    openssh-client \
+    procps \
+    sudo \
+    tldr \
+    unzip \
+    vim \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
