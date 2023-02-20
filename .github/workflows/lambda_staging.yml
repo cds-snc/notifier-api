@@ -8,6 +8,7 @@ on:
 
 env:
   REGISTRY: ${{ secrets.STAGING_API_LAMBDA_ECR_ACCOUNT }}.dkr.ecr.ca-central-1.amazonaws.com/notify
+  AWS_REGION: ca-central-1
 
 jobs:
   build-push-and-deploy:
@@ -27,13 +28,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.STAGING_ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.STAGING_ECR_SECRET_ACCESS_KEY }}
-          aws-region: ca-central-1
+          aws-region: $AWS_REGION
+
+      - name: Set Docker image tag
+        run: |
+          echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build container
         run: |
           docker build \
-          --build-arg GIT_SHA=${GITHUB_SHA::7} \
-          -t $REGISTRY/${{ matrix.image }}:${GITHUB_SHA::7} \
+          --build-arg GIT_SHA=$IMAGE_TAG \
+          -t $REGISTRY/${{ matrix.image }}:$IMAGE_TAG \
           . \
           -f ci/Dockerfile.lambda
 
@@ -41,7 +46,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1.5.3
 
+      - name: Check if image already pushed
+      run: |
+        echo "IMAGE_IN_ECR=$( aws ecr batch-get-image --repository-name=${{ matrix.image}} --image-ids=imageTag=$IMAGE_TAG --query 'images[].imageId.imageTag' --output text )" >> $GITHUB_ENV
+
       - name: Push containers to ECR
+        if: ${{ IMAGE_IN_ECR != $IMAGE_TAG }}
         run: |
           docker push $REGISTRY/${{ matrix.image }}:${GITHUB_SHA::7}
 

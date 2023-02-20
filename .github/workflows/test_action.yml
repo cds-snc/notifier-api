@@ -1,0 +1,63 @@
+
+name: Test ECR check
+
+on:
+  push:
+
+env:
+  REGISTRY: ${{ secrets.STAGING_API_LAMBDA_ECR_ACCOUNT }}.dkr.ecr.ca-central-1.amazonaws.com/notify
+  AWS_REGION: ca-central-1
+
+jobs:
+  test-ecr-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["api-lambda"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+
+      - name: Configure AWS credentials
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1.7.0
+        with:
+          aws-access-key-id: ${{ secrets.STAGING_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.STAGING_ECR_SECRET_ACCESS_KEY }}
+          aws-region: $AWS_REGION
+
+      - name: Set Docker image tags
+        run: |
+          echo "IMAGE_TAG_EXISTS=d34c599" >> $GITHUB_ENV
+          echo "IMAGE_TAG_NOT_EXISTS=steve" >> $GITHUB_ENV
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1.5.3
+
+      - name: Check if images already pushed
+      run: |
+        echo "IMAGE_EXISTS_IN_ECR=$( aws ecr batch-get-image --repository-name=${{ matrix.image}} --image-ids=imageTag=$IMAGE_TAG_EXISTS --query 'images[].imageId.imageTag' --output text )" >> $GITHUB_ENV
+        echo "IMAGE_NOT_EXISTS_IN_ECR=$( aws ecr batch-get-image --repository-name=${{ matrix.image}} --image-ids=imageTag=$IMAGE_TAG_NOT_EXISTS --query 'images[].imageId.imageTag' --output text )" >> $GITHUB_ENV
+
+      - name: Test exists
+        if: ${{ IMAGE_EXISTS_IN_ECR != $IMAGE_TAG_EXISTS }}
+        run: |
+          echo "$IMAGE_TAG_EXISTS does not exist"
+        else:
+        run: |
+          echo "$IMAGE_TAG_EXISTS exists"
+
+      - name: Test doesn't exists
+        if: ${{ IMAGE_TAG_NOT_EXISTS != $IMAGE_TAG_NOT_EXISTS }}
+        run: |
+          echo "$IMAGE_TAG_NOT_EXISTS does not exist"
+        else:
+        run: |
+          echo "$IMAGE_TAG_NOT_EXISTS exists"
+
+      - name: Logout of Amazon ECR
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}
+
