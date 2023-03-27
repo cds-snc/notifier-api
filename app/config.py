@@ -606,8 +606,11 @@ class Production(Config):
 class Staging(Production):
     NOTIFY_ENVIRONMENT = "staging"
 
+class Scratch(Production):
+    NOTIFY_ENVIRONMENT = "scratch"
 
 configs = {
+    "scratch": Scratch,
     "development": Development,
     "test": Test,
     "production": Production,

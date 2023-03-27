@@ -17,14 +17,14 @@ WORKDIR /app
 RUN python -m venv ${POETRY_HOME} \
     && ${POETRY_HOME}/bin/pip3 install poetry==${POETRY_VERSION}
 
-COPY pyproject.toml poetry.lock /app/
+COPY ../pyproject.toml poetry.lock /app/
 
 RUN python -m venv ${APP_VENV} \
     && . ${APP_VENV}/bin/activate \
     && poetry install \
     && poetry add wheel
 
-COPY . /app/
+COPY ../. /app/
 
 RUN . ${APP_VENV}/bin/activate \
     && make generate-version-file
