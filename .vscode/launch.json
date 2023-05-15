@@ -42,7 +42,42 @@
                 "-l",
                 "DEBUG",
                 "-Q",
-                "database-tasks,-priority-database-tasks.fifo,-normal-database-tasks,-bulk-database-tasks,job-tasks,notify-internal-tasks,periodic-tasks,priority-tasks,bulk-tasks,reporting-tasks,research-mode-tasks,retry-tasks,send-sms-tasks,send-email-tasks,service-callbacks,delivery-receipts",
+                "database-tasks,-priority-database-tasks.fifo,-normal-database-tasks,-bulk-database-tasks,job-tasks,notify-internal-tasks,periodic-tasks,priority-tasks,normal-tasks,cbulk-tasks,reporting-tasks,research-mode-tasks,retry-tasks,send-sms-tasks,send-email-tasks,service-callbacks,delivery-receipts",
+            ]
+        },
+        {
+            "name": "Python: Celery Memory Profiler",
+            "type": "python",
+            "request": "launch",
+            "module": "memory_profiler",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "celery",
+                "--app",
+                "run_celery",
+                "worker",
+                "--pidfile",
+                "/tmp/celery.pid",
+                "-l",
+                "INFO",
+                "-Q",
+                "database-tasks,-priority-database-tasks.fifo,-normal-database-tasks,-bulk-database-tasks,job-tasks,notify-internal-tasks,periodic-tasks,priority-tasks,normal-tasks,bulk-tasks,reporting-tasks,research-mode-tasks,retry-tasks,send-sms-tasks,send-email-tasks,service-callbacks,delivery-receipts",
+            ]
+        },
+        {
+            "name": "Python: Celery Beat",
+            "type": "python",
+            "request": "launch",
+            "module": "celery",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--app",
+                "run_celery.notify_celery",
+                "beat",
+                "-l",
+                "DEBUG",
             ]
         },
         {

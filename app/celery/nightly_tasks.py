@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from flask import current_app
+from memory_profiler import profile
 from notifications_utils.statsd_decorators import statsd
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
@@ -35,6 +36,7 @@ from app.utils import get_local_timezone_midnight_in_utc
 
 
 @notify_celery.task(name="remove_sms_email_jobs")
+@profile
 @cronitor("remove_sms_email_jobs")
 @statsd(namespace="tasks")
 def remove_sms_email_csv_files():
@@ -58,6 +60,7 @@ def _remove_csv_files(job_types):
 
 @notify_celery.task(name="delete-sms-notifications")
 @cronitor("delete-sms-notifications")
+@profile
 @statsd(namespace="tasks")
 def delete_sms_notifications_older_than_retention():
     try:
@@ -193,6 +196,7 @@ def delete_inbound_sms():
 
 @notify_celery.task(name="remove_transformed_dvla_files")
 @cronitor("remove_transformed_dvla_files")
+@profile
 @statsd(namespace="tasks")
 def remove_transformed_dvla_files():
     jobs = dao_get_jobs_older_than_data_retention(notification_types=[LETTER_TYPE])

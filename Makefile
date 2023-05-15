@@ -43,8 +43,8 @@ format:
 
 .PHONY: smoke-test
 smoke-test:
-	cd tests_smoke && python smoke_test.py
+	cd tests_smoke && poetry run python smoke_test.py
 
 .PHONY: run
 run:
-	flask run -p 6011 --host=0.0.0.0
+	poetry run flask run -p 6011 --host=0.0.0.0

@@ -301,111 +301,111 @@ class Config(object):
             "schedule": crontab(),
             "options": {"queue": QueueNames.PERIODIC},
         },
-        "delete-verify-codes": {
-            "task": "delete-verify-codes",
-            "schedule": timedelta(minutes=63),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "delete-invitations": {
-            "task": "delete-invitations",
-            "schedule": timedelta(minutes=66),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "check-job-status": {
-            "task": "check-job-status",
-            "schedule": crontab(),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "replay-created-notifications": {
-            "task": "replay-created-notifications",
-            "schedule": crontab(minute="0, 15, 30, 45"),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "in-flight-to-inbox": {
-            "task": "in-flight-to-inbox",
-            "schedule": 60,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-sms-normal": {
-            "task": "beat-inbox-sms-normal",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-sms-bulk": {
-            "task": "beat-inbox-sms-bulk",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-sms-priority": {
-            "task": "beat-inbox-sms-priority",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-email-normal": {
-            "task": "beat-inbox-email-normal",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-email-bulk": {
-            "task": "beat-inbox-email-bulk",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "beat-inbox-email-priority": {
-            "task": "beat-inbox-email-priority",
-            "schedule": 10,
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        ""
-        # app/celery/nightly_tasks.py
-        "timeout-sending-notifications": {
-            "task": "timeout-sending-notifications",
-            "schedule": crontab(hour=0, minute=5),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "create-nightly-billing": {
-            "task": "create-nightly-billing",
-            "schedule": crontab(hour=0, minute=15),
-            "options": {"queue": QueueNames.REPORTING},
-        },
-        "create-nightly-notification-status": {
-            "task": "create-nightly-notification-status",
-            "schedule": crontab(hour=0, minute=30),  # after 'timeout-sending-notifications'
-            "options": {"queue": QueueNames.REPORTING},
-        },
-        "delete-sms-notifications": {
-            "task": "delete-sms-notifications",
-            "schedule": crontab(hour=4, minute=15),  # after 'create-nightly-notification-status'
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "delete-email-notifications": {
-            "task": "delete-email-notifications",
-            "schedule": crontab(hour=4, minute=30),  # after 'create-nightly-notification-status'
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "delete-letter-notifications": {
-            "task": "delete-letter-notifications",
-            "schedule": crontab(hour=4, minute=45),  # after 'create-nightly-notification-status'
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "delete-inbound-sms": {
-            "task": "delete-inbound-sms",
-            "schedule": crontab(hour=1, minute=40),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "send-daily-performance-platform-stats": {
-            "task": "send-daily-performance-platform-stats",
-            "schedule": crontab(hour=2, minute=0),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
-        "remove_transformed_dvla_files": {
-            "task": "remove_transformed_dvla_files",
-            "schedule": crontab(hour=3, minute=40),
-            "options": {"queue": QueueNames.PERIODIC},
-        },
+        # "delete-verify-codes": {
+        #     "task": "delete-verify-codes",
+        #     "schedule": timedelta(minutes=63),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "delete-invitations": {
+        #     "task": "delete-invitations",
+        #     "schedule": timedelta(minutes=66),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "check-job-status": {
+        #     "task": "check-job-status",
+        #     "schedule": crontab(),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "replay-created-notifications": {
+        #     "task": "replay-created-notifications",
+        #     "schedule": crontab(minute="0, 15, 30, 45"),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "in-flight-to-inbox": {
+        #     "task": "in-flight-to-inbox",
+        #     "schedule": 60,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-sms-normal": {
+        #     "task": "beat-inbox-sms-normal",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-sms-bulk": {
+        #     "task": "beat-inbox-sms-bulk",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-sms-priority": {
+        #     "task": "beat-inbox-sms-priority",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-email-normal": {
+        #     "task": "beat-inbox-email-normal",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-email-bulk": {
+        #     "task": "beat-inbox-email-bulk",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "beat-inbox-email-priority": {
+        #     "task": "beat-inbox-email-priority",
+        #     "schedule": 10,
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # ""
+        # # app/celery/nightly_tasks.py
+        # "timeout-sending-notifications": {
+        #     "task": "timeout-sending-notifications",
+        #     "schedule": crontab(hour=0, minute=5),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "create-nightly-billing": {
+        #     "task": "create-nightly-billing",
+        #     "schedule": crontab(hour=0, minute=15),
+        #     "options": {"queue": QueueNames.REPORTING},
+        # },
+        # "create-nightly-notification-status": {
+        #     "task": "create-nightly-notification-status",
+        #     "schedule": crontab(hour=0, minute=30),  # after 'timeout-sending-notifications'
+        #     "options": {"queue": QueueNames.REPORTING},
+        # },
+        # "delete-sms-notifications": {
+        #     "task": "delete-sms-notifications",
+        #     "schedule": crontab(hour=4, minute=15),  # after 'create-nightly-notification-status'
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "delete-email-notifications": {
+        #     "task": "delete-email-notifications",
+        #     "schedule": crontab(hour=4, minute=30),  # after 'create-nightly-notification-status'
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "delete-letter-notifications": {
+        #     "task": "delete-letter-notifications",
+        #     "schedule": crontab(hour=4, minute=45),  # after 'create-nightly-notification-status'
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "delete-inbound-sms": {
+        #     "task": "delete-inbound-sms",
+        #     "schedule": crontab(hour=1, minute=40),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "send-daily-performance-platform-stats": {
+        #     "task": "send-daily-performance-platform-stats",
+        #     "schedule": crontab(hour=2, minute=0),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
+        # "remove_transformed_dvla_files": {
+        #     "task": "remove_transformed_dvla_files",
+        #     "schedule": crontab(hour=18, minute=45),
+        #     "options": {"queue": QueueNames.PERIODIC},
+        # },
         "remove_sms_email_jobs": {
             "task": "remove_sms_email_jobs",
-            "schedule": crontab(hour=4, minute=0),
+            "schedule": crontab(),
             "options": {"queue": QueueNames.PERIODIC},
         },
         # 'remove_letter_jobs': {
