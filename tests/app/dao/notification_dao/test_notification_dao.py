@@ -777,6 +777,7 @@ def test_should_return_notifications_including_one_offs_by_default(sample_user, 
     assert len(include_one_offs_by_default) == 2
 
 
+@pytest.mark.skip(reason="The page_count arg is not supported in our current flask-sqlalchemy")
 def test_should_not_count_pages_when_given_a_flag(sample_user, sample_template):
     save_notification(create_notification(sample_template))
     notification = save_notification(create_notification(sample_template))

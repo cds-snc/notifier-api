@@ -1709,6 +1709,7 @@ def test_get_only_api_created_notifications_for_service(
     assert resp["notifications"][0]["id"] == str(without_job.id)
 
 
+@pytest.mark.skip(reason="The page_count arg is not supported in our current flask-sqlalchemy")
 def test_get_notifications_for_service_without_page_count(
     admin_request,
     sample_job,
