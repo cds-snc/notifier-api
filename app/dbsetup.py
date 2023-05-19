@@ -3,9 +3,15 @@ from typing import Any, Optional
 
 import greenlet  # type: ignore
 import sqlalchemy.types as types
-from flask_sqlalchemy import BaseQuery, SignallingSession, SQLAlchemy, get_state
+from flask_sqlalchemy import BaseQuery, SignallingSession, SQLAlchemy
 from sqlalchemy import orm
 
+def get_state(app):
+    """Gets the state for the application"""
+    assert 'sqlalchemy' in app.extensions, \
+        'The sqlalchemy extension was not registered to the current ' \
+        'application.  Please make sure to call init_app() first.'
+    return app.extensions['sqlalchemy']
 
 # adapted from https://r2c.dev/blog/2020/fixing-leaky-logs-how-to-find-a-bug-and-ensure-it-never-returns/
 class SensitiveString(types.TypeDecorator):
