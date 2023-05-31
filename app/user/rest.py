@@ -649,6 +649,7 @@ def update_password(user_id):
     user = get_user_by_id(user_id=user_id)
     req_json = request.get_json()
     pwd = req_json.get("_password")
+    alert_user = req_json.get("alert_user", True)
 
     login_data = {}
 
@@ -673,10 +674,11 @@ def update_password(user_id):
 
     changes = {"password": "password updated"}
 
-    try:
-        _update_alert(user, changes)
-    except Exception as e:
-        current_app.logger.error(e)
+    if alert_user:
+        try:
+            _update_alert(user, changes)
+        except Exception as e:
+            current_app.logger.error(e)
 
     return jsonify(data=user.serialize()), 200
 
