@@ -650,15 +650,20 @@ def update_password(user_id):
     req_json = request.get_json()
     pwd = req_json.get("_password")
     alert_user = req_json.get("alert_user", True)
+    print("alert_user", alert_user)
 
     login_data = {}
-
+    alert_user = True
     if "loginData" in req_json:
         login_data = req_json["loginData"]
         del req_json["loginData"]
-
+    if "alert_user" in req_json:
+        alert_user = req_json["alert_user"]
+        del req_json["alert_user"]
+        
     update_dct, errors = user_update_password_schema_load_json.load(req_json)
     if errors:
+        print(errors)
         raise InvalidRequest(errors, status_code=400)
 
     response = pwnedpasswords.check(pwd)
@@ -674,6 +679,7 @@ def update_password(user_id):
 
     changes = {"password": "password updated"}
 
+    print("alert_user", alert_user)
     if alert_user:
         try:
             _update_alert(user, changes)

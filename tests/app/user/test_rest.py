@@ -1032,7 +1032,7 @@ def test_update_user_password_saves_correctly(client, sample_service):
     assert resp.status_code == 204
 
 
-def test_update_user_password_failes_when_banned_password_used(client, sample_service):
+def test_update_user_password_fails_when_banned_password_used(client, sample_service):
     sample_user = sample_service.users[0]
     new_password = "password"
     data = {"_password": new_password}
@@ -1079,6 +1079,37 @@ def test_update_user_password_does_not_create_LoginEvent_when_loginData_not_prov
 
     assert LoginEvent.query.count() == 0
 
+def test_update_user_password_alerts_user_as_default(client, sample_service, mocker):
+    mocked_update_alert = mocker.patch("app.user.rest._update_alert")
+    sample_user = sample_service.users[0]
+    new_password = "Sup3rS3cur3_P4ssw0rd"
+    data = {"_password": new_password, "loginData": {"some": "data"}}
+    auth_header = create_authorization_header()
+    headers = [("Content-Type", "application/json"), auth_header]
+
+    resp = client.post(
+        url_for("user.update_password", user_id=sample_user.id),
+        data=json.dumps(data),
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    assert mocked_update_alert.called_once_with(sample_user.id, {"password": "password updated"})
+    
+def test_update_user_password_does_not_alert_user_when_told_not_to(client, sample_service, mocker):
+    mocked_update_alert = mocker.patch("app.user.rest._update_alert")
+    sample_user = sample_service.users[0]
+    new_password = "Sup3rS3cur3_P4ssw0rd"
+    data = {"_password": new_password, "loginData": {"some": "data"}, "alert_user": False}
+    auth_header = create_authorization_header()
+    headers = [("Content-Type", "application/json"), auth_header]
+
+    resp = client.post(
+        url_for("user.update_password", user_id=sample_user.id),
+        data=json.dumps(data),
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    assert mocked_update_alert.not_called()
 
 def test_activate_user(admin_request, sample_user, mocker):
     sample_user.state = "pending"
