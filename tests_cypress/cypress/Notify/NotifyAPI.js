@@ -105,7 +105,15 @@ const API = {
             }
         });
     },
-
+    GetAPIStatus: () => {
+        return cy.request({
+            url: '/',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    }
 }
 
 export default { API, Utilities, Admin };

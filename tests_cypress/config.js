@@ -54,7 +54,7 @@ let LOCAL = {
         'SMOKE_TEST_SMS': '5945e2f0-3e37-4813-9a60-e0665e02e9c8'
     },
     Users: {
-        Team: ['andrew.leith+bannertest@cds-snc.ca'],
+        Team: ['notify-ui-tests@cds-snc.ca'],
         NonTeam: ['person@example.com'],
         Simulated: ['simulate-delivered-2@notification.canada.ca', 'simulate-delivered-3@notification.canada.ca', 'success@simulator.amazonses.com'],
         SimulatedPhone: ['+16132532222', '+16132532223', '+16132532224']
@@ -72,6 +72,6 @@ const config = {
 };
 
 // choose which config to use here
-const ConfigToUse = config.STAGING;
+const ConfigToUse = config.LOCAL;
 
 module.exports = ConfigToUse;

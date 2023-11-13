@@ -6,8 +6,8 @@ import Notify from "../../Notify/NotifyAPI";
 describe(`Email notifications test[${config.CONFIG_NAME}]`, () => {
   var keys = {
     LIVE: Cypress.env(config.CONFIG_NAME).API_KEY_LIVE,
-    TEAM: Cypress.env(config.CONFIG_NAME).API_KEY_TEAM,
-    TEST: Cypress.env(config.CONFIG_NAME).API_KEY_TEST,
+    // TEAM: Cypress.env(config.CONFIG_NAME).API_KEY_TEAM,
+    // TEST: Cypress.env(config.CONFIG_NAME).API_KEY_TEST,
   };
 
 

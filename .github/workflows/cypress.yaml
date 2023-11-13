@@ -1,0 +1,118 @@
+name: Cypress tests
+
+on:
+  push:
+
+jobs:
+  cypress-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11.17-bullseye
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: chummy
+          POSTGRES_DB: notification_api
+        ports:
+        - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:6.2@sha256:9e75c88539241ad7f61bc9c39ea4913b354064b8a75ca5fc40e1cef41b645bc0
+        ports:
+        - 6379:6379
+
+    steps:
+    - name: Install libcurl
+      run: sudo apt-get update && sudo apt-get install libssl-dev libcurl4-openssl-dev
+    - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+      with:
+        python-version: '3.10'
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+    - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install poetry
+      env:
+        POETRY_VERSION: 1.3.2
+      run: pip install poetry==${POETRY_VERSION} && poetry --version
+
+    - name: Check poetry.lock aligns with pyproject.toml
+      run: poetry lock --check
+
+    - name: Install requirements
+      run: poetry install --with test
+    
+    - name: Get python version
+      run: |
+        python_version=$(python  -V | cut -d' ' -f2)
+        echo "python_version=${python_version}" >> $GITHUB_ENV
+    
+    - name: Make version file
+      run: |
+        printf '__commit_sha__ = "09cfe03100443fb9071bba88d5c8775ff54a9ebc"\n__time__ = "2022-07-25:15:11:05"\n' > version.py
+        cp version.py "${{ github.workspace }}/app/"
+
+    - name: Copy site-packages in workspace
+      working-directory: ${{ github.workspace }}
+      shell: bash
+      run: |
+        mkdir -p "${{ github.workspace }}/env/" && cp -fR $(poetry env list | poetry env info -p)/lib/python3.10/site-packages "${{ github.workspace }}/env/"
+
+    - name: Setup .env
+      run: |
+        echo 'NOTIFICATION_QUEUE_PREFIX=api-pr-notification-canada-ca' > .env
+        echo 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' >> .env
+        echo 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' >> .env
+        echo 'AWS_REGION=ca-central-1' >> .env
+        echo 'ASSET_DOMAIN=example.com' >> .env
+        echo 'ASSET_UPLOAD_BUCKET_NAME=not-a-real-secret' >> .env
+        echo 'CSV_UPLOAD_BUCKET_NAME=notification-canada-ca-staging-csv-upload' >> .env
+        echo 'DOCUMENTS_BUCKET=not-a-real-secret' >> .env
+        echo 'NOTIFY_EMAIL_DOMAIN=staging.notification.cdssandbox.xyz' >> .env
+        echo 'ADMIN_CLIENT_SECRET=local_app' >> .env
+        echo 'REDIS_URL=redis://redis:6379' >> .env
+        echo 'REDIS_PUBLISH_URL=redis://redis:6379' >> .env
+        echo 'SQLALCHEMY_DATABASE_URI=postgresql://postgres:chummy@localhost:5432/notification_api' >> .env
+        echo 'SQLALCHEMY_DATABASE_READER_URI=postgresql://postgres:chummy@localhost:5432/notification_api' >> .env
+        echo 'DOCUMENT_DOWNLOAD_API_HOST=http://host.docker.internal:7000' >> .env
+        echo 'FF_REDIS_BATCH_SAVING=true' >> .env
+        echo 'FF_BATCH_INSERTION=true' >> .env
+        echo 'REDIS_ENABLED=true' >> .env
+        echo 'FF_CLOUDWATCH_METRICS_ENABLED=false' >> .env
+        echo 'FF_SPIKE_SMS_DAILY_LIMIT=true' >> .env
+        echo 'FRESH_DESK_ENABLED=false' >> .env
+        echo 'SECRET_KEY=${{ secrets.SECRET_KEY }}' >> .env
+        echo 'DANGEROUS_SALT=${{ secrets.DANGEROUS_SALT }}' >> .env
+        echo 'NOTIFY_ENVIRONMENT=test' >> .env
+        echo 'FLASK_APP=application.py' >> .env
+        echo 'FLASK_DEBUG=true' >> .env
+        echo 'WERKZEUG_DEBUG_PIN=off' >> .env
+        pwd
+    - name: prep db and run notify api
+      run: |
+        poetry run flask db upgrade
+        poetry run python tests_cypress/seed_db.py
+        poetry run make run &
+
+    - name: Write the cypress.env.json file
+      run: |
+        echo '${{ secrets.CYPRESS_ENV_JSON }}' > tests_cypress/cypress.env.json 
+
+    - name: Run cypress tests
+      uses: cypress-io/github-action@d79d2d530a66e641eb4a5f227e13bc985c60b964 # v4.2.2
+      env:
+        CYPRESS_BASE_URL: http://localhost:6011
+      with:
+        record: false
+        build: npx cypress info
+        working-directory: tests_cypress
+        spec: cypress/e2e/api/email_notifications.cy.js
