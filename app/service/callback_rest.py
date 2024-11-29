@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.dao.service_callback_api_dao import (
     delete_service_callback_api,
+    delete_service_callback_api_history,
     get_service_callback_api,
     get_service_callback_api_with_service_id,
     reset_service_callback_api,
@@ -77,7 +78,7 @@ def remove_service_inbound_api(service_id, inbound_api_id):
         error = "Service inbound API not found"
         raise InvalidRequest(error, status_code=404)
 
-    delete_service_inbound_api(inbound_api)
+    delete_service_inbound_api(inbound_api)  # this is inline
     return "", 204
 
 
@@ -172,3 +173,23 @@ def handle_sql_error(e, table_name):
         return jsonify(result="error", message="No result found"), 404
     else:
         raise e
+
+
+# Utility endpoints for Cypress UI tests
+@service_callback_blueprint.route("/delivery-receipt-api/cleanup/<uuid:callback_api_id>", methods=["DELETE"])
+def cleanup_service_callback_api(service_id, callback_api_id):
+    """
+    This utility endpoint cleans up service callback api data by service and callback api id.
+    It deletes the data in the service_callback_api and service_callback_api_history tables
+    to make end-to-end Cypress tests to be repeated reliably and predictably.
+    """
+    callback_api = get_service_callback_api(callback_api_id, service_id)
+
+    if not callback_api:
+        error = "Service delivery receipt callback API not found"
+        raise InvalidRequest(error, status_code=404)
+
+    delete_service_callback_api_history(callback_api)
+    delete_service_callback_api(callback_api)
+
+    return "", 204

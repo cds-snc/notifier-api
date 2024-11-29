@@ -6,6 +6,7 @@ create_service_callback_api_schema = {
     "type": "object",
     "title": "Create service callback/inbound api",
     "properties": {
+        "id": uuid,
         "url": https_url,
         "bearer_token": {"type": "string", "minLength": 10},
         "updated_by_id": uuid,

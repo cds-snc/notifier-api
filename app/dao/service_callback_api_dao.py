@@ -55,7 +55,7 @@ def resign_service_callbacks(resign: bool, unsafe: bool = False):
 @transactional
 @version_class(ServiceCallbackApi)
 def save_service_callback_api(service_callback_api):
-    service_callback_api.id = create_uuid()
+    service_callback_api.id = create_uuid() if not service_callback_api.id else service_callback_api.id
     service_callback_api.created_at = datetime.utcnow()
     db.session.add(service_callback_api)
 
@@ -93,6 +93,18 @@ def get_service_complaint_callback_api_for_service(service_id) -> ServiceCallbac
 @transactional
 def delete_service_callback_api(service_callback_api):
     db.session.delete(service_callback_api)
+
+
+# Used by Cypress to clean up test data
+@transactional
+def delete_service_callback_api_history(service_callback_api: ServiceCallbackApi):
+    callback_history = (
+        service_callback_api.get_history_model()
+        .query.filter_by(service_id=service_callback_api.service_id, id=service_callback_api.id)
+        .all()
+    )
+    for history in callback_history:
+        db.session.delete(history)
 
 
 @transactional
