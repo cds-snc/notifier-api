@@ -1,4 +1,9 @@
-FROM python:3.10-alpine3.16@sha256:afe68972cc00883d70b3760ee0ffbb7375cf09706c122dda7063ffe64c5be21b
+FROM public.ecr.aws/newrelic-lambda-layers-for-docker/newrelic-lambda-layers-python:310 AS layer
+
+FROM python:3.10-alpine
+
+# Copy New Relic Layer code
+COPY --from=layer /opt/ /opt/
 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/python/lib/python3.10/site-packages"
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -9,7 +14,12 @@ ENV POETRY_VERSION="1.7.1"
 ENV POETRY_VIRTUALENVS_CREATE="false"
 ENV PATH="${APP_VENV}/bin:${POETRY_HOME}/bin:$PATH"
 
-RUN apk add --no-cache bash build-base git libtool cmake autoconf automake gcc musl-dev postgresql-dev g++ libc6-compat libexecinfo-dev make libffi-dev libmagic libcurl curl-dev rust cargo && rm -rf /var/cache/apk/*
+RUN apk add --no-cache bash build-base git libtool cmake autoconf automake gcc musl-dev postgresql-dev g++ libc6-compat make libffi-dev libmagic libcurl curl-dev rust cargo && rm -rf /var/cache/apk/*
+
+# for libresolv needed by newrelic
+RUN apk add gcompat
+# Install libexecinfo-dev ffrom a previous alpine version - check if this is still needed when we next upgrade the base image
+RUN apk add --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ libexecinfo-dev
 
 RUN mkdir -p ${TASK_ROOT}
 WORKDIR ${TASK_ROOT}
@@ -42,7 +52,7 @@ COPY bin/sync_lambda_envs.sh /
 RUN chmod 755 /usr/bin/aws-lambda-rie /entry.sh /sync_lambda_envs.sh
 
 # New Relic lambda layer
-RUN unzip newrelic-layer.zip -d /opt && rm newrelic-layer.zip
+# RUN unzip newrelic-layer.zip -d /opt && rm newrelic-layer.zip
 
 ENTRYPOINT [ "/entry.sh" ]
 

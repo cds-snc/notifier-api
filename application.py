@@ -43,5 +43,5 @@ if os.environ.get("USE_LOCAL_JINJA_TEMPLATES") == "True":
 
 def handler(event, context):
     newrelic.agent.initialize(environment=app.config["NOTIFY_ENVIRONMENT"])  # noqa: E402
-    newrelic.agent.register_application(timeout=20.0)
+    newrelic.agent.register_application(timeout=120.0)
     return apig_wsgi_handler(event, context)
