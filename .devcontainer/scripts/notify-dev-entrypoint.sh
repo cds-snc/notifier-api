@@ -40,7 +40,7 @@ cd /workspace
 echo -e "fpath+=/.zfunc" >> ~/.zshrc
 echo -e "autoload -Uz compinit && compinit"
 
-pip install poetry==${POETRY_VERSION}
+pip install poetry=="${POETRY_VERSION}" poetry-plugin-sort
 export PATH=$PATH:/home/vscode/.local/bin/
 which poetry
 poetry --version
@@ -54,6 +54,9 @@ make generate-version-file
 
 # Install dependencies
 poetry install
+
+# Install pre-commit hooks
+poetry run pre-commit install
 
 # Upgrade schema of the notification_api database.
 poetry run flask db upgrade

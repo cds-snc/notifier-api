@@ -3,6 +3,16 @@ from datetime import datetime
 
 import pytest
 from freezegun import freeze_time
+from tests.app.conftest import create_sample_notification
+from tests.app.db import (
+    create_notification,
+    create_service,
+    create_service_callback_api,
+    create_template,
+    create_user,
+    save_notification,
+)
+from tests.conftest import set_config
 
 from app import annual_limit_client, statsd_client
 from app.aws.mocks import sns_failed_callback, sns_success_callback
@@ -18,16 +28,6 @@ from app.models import (
 )
 from app.notifications.callbacks import create_delivery_status_callback_data
 from celery.exceptions import MaxRetriesExceededError
-from tests.app.conftest import create_sample_notification
-from tests.app.db import (
-    create_notification,
-    create_service,
-    create_service_callback_api,
-    create_template,
-    create_user,
-    save_notification,
-)
-from tests.conftest import set_config
 
 
 def test_process_sns_results_delivered(sample_template, notify_db, notify_db_session, mocker):

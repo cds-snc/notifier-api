@@ -2,9 +2,9 @@ from collections import namedtuple
 from datetime import date
 
 import pytest
+from tests.app.db import create_notification, save_notification
 
 from app.celery.tasks import check_billable_units, get_billing_date_in_est_from_filename
-from tests.app.db import create_notification, save_notification
 
 
 @pytest.fixture

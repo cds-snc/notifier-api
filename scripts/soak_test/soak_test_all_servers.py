@@ -12,9 +12,7 @@ class MultipleHostsUser(HttpUser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.admin_client = HttpSession(
-            base_url=self.host, request_event=self.client.request_event, user=self
-        )
+        self.admin_client = HttpSession(base_url=self.host, request_event=self.client.request_event, user=self)
 
         self.api_client = HttpSession(
             base_url=url_with_prefix(self.host, "api"), request_event=self.client.request_event, user=self

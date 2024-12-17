@@ -1268,7 +1268,8 @@ def test_preview_letter_template_precompiled_s3_error(notify_api, client, admin_
             )
 
             assert (
-                request["message"] == "Error extracting requested page from PDF file for notification_id {} type "
+                request["message"]
+                == "Error extracting requested page from PDF file for notification_id {} type "
                 "<class 'botocore.exceptions.ClientError'> An error occurred (403) "
                 "when calling the GetObject operation: Unauthorized".format(notification.id)
             )

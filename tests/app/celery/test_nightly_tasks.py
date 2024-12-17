@@ -7,6 +7,18 @@ import pytz
 from flask import current_app
 from freezegun import freeze_time
 from notifications_utils.clients.zendesk.zendesk_client import ZendeskClient
+from tests.app.aws.test_s3 import single_s3_object_stub
+from tests.app.conftest import datetime_in_past
+from tests.app.db import (
+    create_ft_notification_status,
+    create_job,
+    create_notification,
+    create_service,
+    create_service_callback_api,
+    create_service_data_retention,
+    create_template,
+    save_notification,
+)
 
 from app.celery import nightly_tasks
 from app.celery.nightly_tasks import (
@@ -32,18 +44,6 @@ from app.config import QueueNames
 from app.exceptions import NotificationTechnicalFailureException
 from app.models import EMAIL_TYPE, LETTER_TYPE, SMS_TYPE
 from app.notifications.callbacks import create_delivery_status_callback_data
-from tests.app.aws.test_s3 import single_s3_object_stub
-from tests.app.conftest import datetime_in_past
-from tests.app.db import (
-    create_ft_notification_status,
-    create_job,
-    create_notification,
-    create_service,
-    create_service_callback_api,
-    create_service_data_retention,
-    create_template,
-    save_notification,
-)
 
 
 def mock_s3_get_list_match(bucket_name, subfolder="", suffix="", last_modified=None):
@@ -248,9 +248,7 @@ def test_timeout_notifications_sends_status_update_to_service(client, sample_tem
 
 
 def test_send_daily_performance_stats_calls_does_not_send_if_inactive(client, mocker):
-    send_mock = mocker.patch(
-        "app.celery.nightly_tasks.total_sent_notifications.send_total_notifications_sent_for_day_stats"
-    )  # noqa
+    send_mock = mocker.patch("app.celery.nightly_tasks.total_sent_notifications.send_total_notifications_sent_for_day_stats")  # noqa
 
     with patch.object(PerformancePlatformClient, "active", new_callable=PropertyMock) as mock_active:
         mock_active.return_value = False
@@ -263,9 +261,7 @@ def test_send_daily_performance_stats_calls_does_not_send_if_inactive(client, mo
 def test_send_total_sent_notifications_to_performance_platform_calls_with_correct_totals(
     notify_db_session, sample_template, sample_email_template, mocker
 ):
-    perf_mock = mocker.patch(
-        "app.celery.nightly_tasks.total_sent_notifications.send_total_notifications_sent_for_day_stats"
-    )  # noqa
+    perf_mock = mocker.patch("app.celery.nightly_tasks.total_sent_notifications.send_total_notifications_sent_for_day_stats")  # noqa
 
     today = date(2016, 6, 11)
     create_ft_notification_status(utc_date=today, template=sample_template)

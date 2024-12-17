@@ -1,4 +1,3 @@
-
 import argparse
 import sys
 from datetime import datetime
@@ -23,7 +22,7 @@ def create_notifications(n: int, ref: str) -> List[NotificationHistory]:
             template_version=1,
             service_id=Config.NOTIFY_SERVICE_ID,
             notification_type="email",
-            key_type='normal',
+            key_type="normal",
             client_reference=ref,
         )
         for _ in range(n)
@@ -31,11 +30,29 @@ def create_notifications(n: int, ref: str) -> List[NotificationHistory]:
     return notifications
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--notifications", default=1, type=int, help="number of notifications to add to the notification_history table (default 1)")
-    parser.add_argument("-r", "--reference", default="manually created", type=str, help="client reference to use for the notifications (default 'manually created')")
-    parser.add_argument("-c", "--chunksize", default=DEFAULT_CHUNK_SIZE, type=int, help=f"chunk size for bulk_save_objects (default {DEFAULT_CHUNK_SIZE})")
+    parser.add_argument(
+        "-n",
+        "--notifications",
+        default=1,
+        type=int,
+        help="number of notifications to add to the notification_history table (default 1)",
+    )
+    parser.add_argument(
+        "-r",
+        "--reference",
+        default="manually created",
+        type=str,
+        help="client reference to use for the notifications (default 'manually created')",
+    )
+    parser.add_argument(
+        "-c",
+        "--chunksize",
+        default=DEFAULT_CHUNK_SIZE,
+        type=int,
+        help=f"chunk size for bulk_save_objects (default {DEFAULT_CHUNK_SIZE})",
+    )
     args = parser.parse_args()
 
     app = Flask("enlarge_db")

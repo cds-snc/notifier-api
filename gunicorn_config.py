@@ -70,9 +70,7 @@ def worker_abort(worker):
 def on_exit(server):
     elapsed_time = time.time() - start_time
     server.log.info("Stopping Notifications API")
-    server.log.info(
-        "Total gunicorn API running time: {:.2f} seconds".format(elapsed_time)
-    )
+    server.log.info("Total gunicorn API running time: {:.2f} seconds".format(elapsed_time))
 
 
 def worker_int(worker):

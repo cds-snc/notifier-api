@@ -1,6 +1,5 @@
 import pytest
 from flask import json
-
 from tests.app.db import create_organisation, create_service
 
 

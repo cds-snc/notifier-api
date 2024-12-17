@@ -4,12 +4,6 @@ from datetime import datetime
 import pytest
 import requests_mock
 from freezegun import freeze_time
-
-from app import DATETIME_FORMAT, signer_complaint, signer_delivery_status
-from app.celery.service_callback_tasks import (
-    send_complaint_to_service,
-    send_delivery_status_to_service,
-)
 from tests.app.db import (
     create_complaint,
     create_notification,
@@ -17,6 +11,12 @@ from tests.app.db import (
     create_service_callback_api,
     create_template,
     save_notification,
+)
+
+from app import DATETIME_FORMAT, signer_complaint, signer_delivery_status
+from app.celery.service_callback_tasks import (
+    send_complaint_to_service,
+    send_delivery_status_to_service,
 )
 
 

@@ -82,9 +82,7 @@ def test_dvla_ack_calls_does_not_call_letter_notifications_task(client, mocker):
 
 def _sample_sns_s3_callback(filename):
     message_contents = """{"Records":[{"eventVersion":"2.0","eventSource":"aws:s3","awsRegion":"eu-west-1","eventTime":"2017-05-16T11:38:41.073Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"some-p-id"},"requestParameters":{"sourceIPAddress":"8.8.8.8"},"responseElements":{"x-amz-request-id":"some-r-id","x-amz-id-2":"some-x-am-id"},"s3":{"s3SchemaVersion":"1.0","configurationId":"some-c-id","bucket":{"name":"some-bucket","ownerIdentity":{"principalId":"some-p-id"},"arn":"some-bucket-arn"},
-            "object":{"key":"%s"}}}]}""" % (
-        filename
-    )  # noqa
+            "object":{"key":"%s"}}}]}""" % (filename)  # noqa
     return json.dumps(
         {
             "SigningCertURL": "foo.pem",

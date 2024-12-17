@@ -1,6 +1,14 @@
 import uuid
 
 import pytest
+from tests.app.db import (
+    create_domain,
+    create_email_branding,
+    create_letter_branding,
+    create_organisation,
+    create_service,
+    create_user,
+)
 
 from app.dao.organisation_dao import (
     dao_add_service_to_organisation,
@@ -10,14 +18,6 @@ from app.dao.service_data_retention_dao import (
     fetch_service_data_retention_by_notification_type,
 )
 from app.models import Organisation
-from tests.app.db import (
-    create_domain,
-    create_email_branding,
-    create_letter_branding,
-    create_organisation,
-    create_service,
-    create_user,
-)
 
 
 def test_get_all_organisations(admin_request, notify_db_session):

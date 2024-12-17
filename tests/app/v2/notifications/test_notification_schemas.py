@@ -105,7 +105,8 @@ def test_get_notifications_request_invalid_statuses_and_template_types():
             "status {} is not one of [cancelled, created, sending, sent, delivered, "
             "pending, failed, technical-failure, temporary-failure, permanent-failure, "
             "pending-virus-check, validation-failed, virus-scan-failed, returned-letter, "
-            "pii-check-failed, accepted, received]".format(invalid_status) in error_messages
+            "pii-check-failed, accepted, received]".format(invalid_status)
+            in error_messages
         )
 
     for invalid_template_type in ["orange", "avocado"]:

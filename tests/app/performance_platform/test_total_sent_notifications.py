@@ -1,12 +1,12 @@
 from datetime import date, datetime
 
 from freezegun import freeze_time
+from tests.app.db import create_ft_notification_status, create_template
 
 from app.performance_platform.total_sent_notifications import (
     get_total_sent_notifications_for_day,
     send_total_notifications_sent_for_day_stats,
 )
-from tests.app.db import create_ft_notification_status, create_template
 
 
 # This test assumes the local timezone is EST

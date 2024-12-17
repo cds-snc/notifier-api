@@ -15,17 +15,19 @@ from locust import HttpUser, constant_pacing, task
 from tests_smoke.smoke.common import job_line, rows_to_csv  # type: ignore
 
 load_dotenv()
-NotifyApiUserTemplateGroup = make_dataclass('NotifyApiUserTemplateGroup', [
-    'bulk_email_id',
-    'email_id',
-    'email_with_attachment_id',
-    'email_with_link_id',
-    'sms_id',
-])
+NotifyApiUserTemplateGroup = make_dataclass(
+    "NotifyApiUserTemplateGroup",
+    [
+        "bulk_email_id",
+        "email_id",
+        "email_with_attachment_id",
+        "email_with_link_id",
+        "sms_id",
+    ],
+)
 
 
 class NotifyApiUser(HttpUser):
-
     wait_time = constant_pacing(60)
     host = os.getenv("PERF_TEST_DOMAIN", "https://api.staging.notification.cdssandbox.xyz")
 
@@ -80,17 +82,14 @@ class NotifyApiUser(HttpUser):
         json = {
             "name": f"My bulk name {datetime.utcnow().isoformat()}",
             "template_id": self.template_group.bulk_email_id,
-            "csv": rows_to_csv([["email address", "application_file"], *job_line(self.email, 2)])
+            "csv": rows_to_csv([["email address", "application_file"], *job_line(self.email, 2)]),
         }
 
         self.client.post("/v2/notifications/bulk", json=json, headers=self.headers)
 
     @task(16)
     def send_sms_notifications(self):
-        json = {
-            "phone_number": self.phone_number,
-            "template_id": self.template_group.sms_id
-        }
+        json = {"phone_number": self.phone_number, "template_id": self.template_group.sms_id}
 
         self.client.post("/v2/notifications/sms", json=json, headers=self.headers)
 

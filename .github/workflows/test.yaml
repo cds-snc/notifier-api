@@ -36,7 +36,7 @@ jobs:
     - name: Install poetry
       env:
         POETRY_VERSION: "1.7.1"
-      run: pip install poetry==${POETRY_VERSION} && poetry --version
+      run: pip install poetry==${POETRY_VERSION} poetry-plugin-sort && poetry --version
     - name: Check poetry.lock aligns with pyproject.toml
       run: poetry check --lock
     - name: Install requirements

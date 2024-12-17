@@ -5,6 +5,18 @@ from decimal import Decimal
 import pytest
 from freezegun import freeze_time
 from notifications_utils.timezones import convert_utc_to_local_timezone
+from tests.app.db import (
+    create_ft_notification_status,
+    create_letter_rate,
+    create_notification,
+    create_notification_history,
+    create_rate,
+    create_service,
+    create_template,
+    create_user,
+    save_notification,
+)
+from tests.conftest import set_config
 
 from app import annual_limit_client
 from app.celery.reporting_tasks import (
@@ -25,18 +37,6 @@ from app.models import (
     FactNotificationStatus,
     Notification,
 )
-from tests.app.db import (
-    create_ft_notification_status,
-    create_letter_rate,
-    create_notification,
-    create_notification_history,
-    create_rate,
-    create_service,
-    create_template,
-    create_user,
-    save_notification,
-)
-from tests.conftest import set_config
 
 
 def mocker_get_rate(

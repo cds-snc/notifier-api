@@ -41,7 +41,7 @@ class NotifyApiUser(HttpUser):
         json = {
             "name": f"bulk emails {datetime.utcnow().isoformat()}",
             "template_id": template,
-            "csv": rows_to_csv([["email address"], *job_lines(self.email_address, count)])
+            "csv": rows_to_csv([["email address"], *job_lines(self.email_address, count)]),
         }
         self.client.post("/v2/notifications/bulk", json=json, headers=self.headers, timeout=60)
 
@@ -49,7 +49,7 @@ class NotifyApiUser(HttpUser):
         json = {
             "name": f"bulk sms {datetime.utcnow().isoformat()}",
             "template_id": template,
-            "csv": rows_to_csv([["phone_number"], *job_lines(self.phone_number, count)])
+            "csv": rows_to_csv([["phone_number"], *job_lines(self.phone_number, count)]),
         }
         self.client.post("/v2/notifications/bulk", json=json, headers=self.headers, timeout=60)
 

@@ -109,7 +109,9 @@ def job_succeeded(service_id: str, job_id: str) -> bool:
         data = response.json()["data"]
         if data["job_status"] != "finished":
             next
-        success = all([stat["status"] == "delivered" for stat in data["statistics"]]) or (Config.IS_LOCAL and all(["fail" not in stat["status"] for stat in data["statistics"]]))
+        success = all([stat["status"] == "delivered" for stat in data["statistics"]]) or (
+            Config.IS_LOCAL and all(["fail" not in stat["status"] for stat in data["statistics"]])
+        )
         failure = any([stat["status"] == "permanent-failure" for stat in data["statistics"]])
         if success or failure:
             break

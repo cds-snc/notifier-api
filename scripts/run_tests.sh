@@ -23,14 +23,11 @@ function display_result {
 make test-requirements
 display_result $? 1 "Requirements check"
 
-black --config pyproject.toml --check .
-display_result $? 2 "Code style check (Black)"
+ruff check .
+display_result $? 1 "Code style check"
 
-flake8 .
-display_result $? 1 "Code style check (flake8)"
-
-isort --check-only .
-display_result $? 2 "Import order check"
+ruff check --select I .
+display_result $? 1 "Import order check"
 
 mypy .
 display_result $? 1 "Type check"

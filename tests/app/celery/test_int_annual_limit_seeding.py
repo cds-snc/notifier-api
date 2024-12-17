@@ -2,11 +2,6 @@ import uuid
 from datetime import datetime
 
 from freezegun import freeze_time
-
-from app import annual_limit_client
-from app.aws.mocks import sns_success_callback
-from app.celery.process_sns_receipts_tasks import process_sns_results
-from app.celery.reporting_tasks import create_nightly_notification_status_for_day
 from tests.app.db import (
     create_notification,
     create_service,
@@ -16,9 +11,17 @@ from tests.app.db import (
 )
 from tests.conftest import set_config
 
+from app import annual_limit_client
+from app.aws.mocks import sns_success_callback
+from app.celery.process_sns_receipts_tasks import process_sns_results
+from app.celery.reporting_tasks import create_nightly_notification_status_for_day
+
 
 def test_int_annual_limit_seeding_and_incrementation_flows_in_celery(sample_template, notify_api, mocker):
-    """This integration-style test verifies the annual limit seeding and notification counting flows across multiple days, testing the flow between the process_sns_receipts task, which is responsible for seeded and incrementing notification counts in Redis, and the create_nightly_notification_status_for_day task, which is responsible for clearing the counts for the current day in Redis
+    """
+    This integration-style test verifies the annual limit seeding and notification counting flows across multiple days, testing the flow
+    between the process_sns_receipts task, which is responsible for seeded and incrementing notification counts in Redis, and the
+    create_nightly_notification_status_for_day task, which is responsible for clearing the counts for the current day in Redis
 
     1. Seed the Redis annual limit keys with notification counts and set the seeded_at key for 25 services
     2. On day 1, each service sends email and sms notifications, with 1 delivered and 1 failed.

@@ -11,15 +11,17 @@ from dotenv import load_dotenv
 from locust import HttpUser, constant_pacing, task
 
 load_dotenv()
-NotifyApiUserTemplateGroup = make_dataclass('NotifyApiUserTemplateGroup', [
-    'email_id',
-    'email_with_attachment_id',
-    'email_with_link_id',
-])
+NotifyApiUserTemplateGroup = make_dataclass(
+    "NotifyApiUserTemplateGroup",
+    [
+        "email_id",
+        "email_with_attachment_id",
+        "email_with_link_id",
+    ],
+)
 
 
 class NotifyApiUser(HttpUser):
-
     wait_time = constant_pacing(60)
     host = os.getenv("PERF_TEST_DOMAIN", "https://api.staging.notification.cdssandbox.xyz")
 
@@ -69,10 +71,10 @@ class NotifyApiUser(HttpUser):
 
     def __email_json(self, template_id, personalisation={}):
         email_invalid = [
-            "complaint@simulator.amazonses.com", 
-            "bounce@simulator.amazonses.com", 
-            "ooto@simulator.amazonses.com", 
-            "blacklist@simulator.amazonses.com"
+            "complaint@simulator.amazonses.com",
+            "bounce@simulator.amazonses.com",
+            "ooto@simulator.amazonses.com",
+            "blacklist@simulator.amazonses.com",
         ]
         email_index = random.randint(0, len(email_invalid) - 1)
         email = email_invalid[email_index] if random.random() <= self.fail_rate else self.email_success

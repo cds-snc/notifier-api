@@ -1,15 +1,15 @@
 import uuid
 
 import pytest
-
-from app.dao.service_user_dao import dao_get_service_user
-from app.models import TemplateFolder
 from tests.app.db import (
     create_service,
     create_template,
     create_template_folder,
     create_user,
 )
+
+from app.dao.service_user_dao import dao_get_service_user
+from app.models import TemplateFolder
 
 
 def test_get_folders_for_service(admin_request, notify_db_session):

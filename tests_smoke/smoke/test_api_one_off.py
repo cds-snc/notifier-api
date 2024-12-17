@@ -11,7 +11,9 @@ from .common import (
 )
 
 
-def test_api_one_off(notification_type: Notification_type, attachment_type: Attachment_type = Attachment_type.NONE, local: bool = False):
+def test_api_one_off(
+    notification_type: Notification_type, attachment_type: Attachment_type = Attachment_type.NONE, local: bool = False
+):
     if attachment_type is Attachment_type.NONE:
         print(f"test_api_oneoff ({notification_type.value})... ", end="", flush=True)
     else:

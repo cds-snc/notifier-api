@@ -10,7 +10,7 @@ load_dotenv()
 @events.init_command_line_parser.add_listener
 def _(parser):
     parser.add_argument("--ref", type=str, default="test", help="reference")
-    parser.add_argument("--sms", action='store_true', help="send sms")
+    parser.add_argument("--sms", action="store_true", help="send sms")
 
 
 class NotifyApiUser(HttpUser):

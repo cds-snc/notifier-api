@@ -1,7 +1,7 @@
 import pytest
+from tests.app.db import create_invited_org_user
 
 from app.models import INVITE_PENDING, Notification
-from tests.app.db import create_invited_org_user
 
 
 @pytest.mark.parametrize(

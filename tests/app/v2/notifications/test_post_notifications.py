@@ -2818,7 +2818,7 @@ class TestSeedingBounceRateData:
     def test_seed_bounce_rate(self, notify_api, sample_email_template, mocker, epoch_time, redis_result, result):
         service_id = str(sample_email_template.service_id)
         mocker.patch("app.v2.notifications.post_notifications.seed_bounce_rate_in_redis.apply_async")
-        mocker.patch("app.v2.notifications.post_notifications.redis_store.get", return_value=redis_result)
+
         # Convert string to datetime object
         date_object = datetime.strptime(epoch_time, "%Y-%m-%d %H:%M:%S.%f")
 

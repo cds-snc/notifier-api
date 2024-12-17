@@ -1867,10 +1867,10 @@ def test_get_services_with_detailed_flag(client, notify_db, notify_db_session):
 
 
 def test_get_services_with_detailed_flag_excluding_from_test_key(notify_api, notify_db, notify_db_session):
-    create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_NORMAL),
-    create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEAM),
-    create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEST),
-    create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEST),
+    (create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_NORMAL),)
+    (create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEAM),)
+    (create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEST),)
+    (create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEST),)
     create_sample_notification(notify_db, notify_db_session, key_type=KEY_TYPE_TEST)
 
     with notify_api.test_request_context(), notify_api.test_client() as client:

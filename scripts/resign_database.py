@@ -17,7 +17,7 @@ import sys
 from dotenv import load_dotenv
 from flask import Flask
 
-sys.path.append('..')  # needed so we can find app (as run from scripts/ folder)
+sys.path.append("..")  # needed so we can find app (as run from scripts/ folder)
 
 from flask import current_app  # noqa: E402
 
@@ -40,10 +40,12 @@ def resign_all(chunk: int, resign: bool, unsafe: bool, notifications: bool):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--notifications", default=False, action='store_true', help="resign notifications (default false)")
-    parser.add_argument("-c", "--chunk", default=25000, type=int, help="size of chunks of notifications to resign at a time (default 25000)")
-    parser.add_argument("-r", "--resign", default=False, action='store_true', help="resign columns (default false)")
-    parser.add_argument("-u", "--unsafe", default=False, action='store_true', help="ignore bad signatures (default false)")
+    parser.add_argument("-n", "--notifications", default=False, action="store_true", help="resign notifications (default false)")
+    parser.add_argument(
+        "-c", "--chunk", default=25000, type=int, help="size of chunks of notifications to resign at a time (default 25000)"
+    )
+    parser.add_argument("-r", "--resign", default=False, action="store_true", help="resign columns (default false)")
+    parser.add_argument("-u", "--unsafe", default=False, action="store_true", help="ignore bad signatures (default false)")
 
     args = parser.parse_args()
 

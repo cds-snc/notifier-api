@@ -17,17 +17,19 @@ from locust import HttpUser, constant_pacing, task
 from tests_smoke.smoke.common import job_line, rows_to_csv  # type: ignore
 
 load_dotenv()
-NotifyApiUserTemplateGroup = make_dataclass('NotifyApiUserTemplateGroup', [
-    'bulk_email_id',
-    'email_id',
-    'email_with_attachment_id',
-    'email_with_link_id',
-    'sms_id',
-])
+NotifyApiUserTemplateGroup = make_dataclass(
+    "NotifyApiUserTemplateGroup",
+    [
+        "bulk_email_id",
+        "email_id",
+        "email_with_attachment_id",
+        "email_with_link_id",
+        "sms_id",
+    ],
+)
 
 
 class NotifyApiUser(HttpUser):
-
     wait_time = constant_pacing(60)  # 60 seconds between each task
     host = os.getenv("PERF_TEST_DOMAIN", "https://api.staging.notification.cdssandbox.xyz")
 
@@ -54,7 +56,7 @@ class NotifyApiUser(HttpUser):
         json = {
             "name": f"Send rate test {datetime.utcnow().isoformat()}",
             "template_id": self.template_group.bulk_email_id,
-            "csv": rows_to_csv([["email address", "application_file"], *job_line(self.email, BULK_EMAIL_SIZE)])
+            "csv": rows_to_csv([["email address", "application_file"], *job_line(self.email, BULK_EMAIL_SIZE)]),
         }
 
         self.client.post("/v2/notifications/bulk", json=json, headers=self.headers)

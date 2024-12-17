@@ -54,8 +54,10 @@ def send_admin_csv(notification_type: Notification_type, job_size: int):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--notifications", default=1, type=int, help="total number of notifications")
-    parser.add_argument("-j", "--job_size", default=DEFAULT_JOB_SIZE, type=int, help=f"size of bulk send jobs (default {DEFAULT_JOB_SIZE})")
-    parser.add_argument("--sms", default=False, action='store_true', help="send sms instead of emails")
+    parser.add_argument(
+        "-j", "--job_size", default=DEFAULT_JOB_SIZE, type=int, help=f"size of bulk send jobs (default {DEFAULT_JOB_SIZE})"
+    )
+    parser.add_argument("--sms", default=False, action="store_true", help="send sms instead of emails")
 
     args = parser.parse_args()
     load_dotenv()

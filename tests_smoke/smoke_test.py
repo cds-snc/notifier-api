@@ -8,8 +8,10 @@ from smoke.test_api_one_off import test_api_one_off  # type: ignore
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--local", default=False, action='store_true', help="run locally, do not check for delivery success (default false)")
-    parser.add_argument("--nofiles", default=False, action='store_true', help="do not send files (default false)")
+    parser.add_argument(
+        "-l", "--local", default=False, action="store_true", help="run locally, do not check for delivery success (default false)"
+    )
+    parser.add_argument("--nofiles", default=False, action="store_true", help="do not send files (default false)")
     args = parser.parse_args()
 
     print("API Smoke test\n")

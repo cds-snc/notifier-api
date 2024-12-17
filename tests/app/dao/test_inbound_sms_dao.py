@@ -270,9 +270,7 @@ def test_most_recent_inbound_sms_only_returns_most_recent_for_each_number(notify
 
     with set_config(notify_api, "PAGE_SIZE", 3):
         with freeze_time("2017-01-02"):
-            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(
-                sample_service.id, limit_days=7, page=1
-            )  # noqa
+            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, limit_days=7, page=1)  # noqa
 
     assert len(res.items) == 2
     assert res.has_next is False
@@ -334,9 +332,7 @@ def test_most_recent_inbound_sms_paginates_properly(notify_api, sample_service):
     with set_config(notify_api, "PAGE_SIZE", 2):
         with freeze_time("2017-01-02"):
             # first page has most recent 444 and 333
-            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(
-                sample_service.id, limit_days=7, page=1
-            )  # noqa
+            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, limit_days=7, page=1)  # noqa
             assert len(res.items) == 2
             assert res.has_next is True
             assert res.per_page == 2
@@ -344,9 +340,7 @@ def test_most_recent_inbound_sms_paginates_properly(notify_api, sample_service):
             assert res.items[1].content == "333 2"
 
             # second page has no 444 or 333 - just most recent 222 and 111
-            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(
-                sample_service.id, limit_days=7, page=2
-            )  # noqa
+            res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, limit_days=7, page=2)  # noqa
             assert len(res.items) == 2
             assert res.has_next is False
             assert res.items[0].content == "222 2"
@@ -371,9 +365,7 @@ def test_most_recent_inbound_sms_only_returns_values_within_7_days(sample_servic
     )
 
     with freeze_time("Monday 10th April 2017 12:00:00"):
-        res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(
-            sample_service.id, limit_days=7, page=1
-        )  # noqa
+        res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, limit_days=7, page=1)  # noqa
 
     assert len(res.items) == 1
     assert res.items[0].content == "new"

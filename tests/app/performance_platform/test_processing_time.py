@@ -1,12 +1,12 @@
 from datetime import date, datetime, timedelta
 
 from freezegun import freeze_time
+from tests.app.db import create_notification, save_notification
 
 from app.performance_platform.processing_time import (
     send_processing_time_data,
     send_processing_time_to_performance_platform,
 )
-from tests.app.db import create_notification, save_notification
 
 
 @freeze_time("2016-10-18T06:00")

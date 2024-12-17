@@ -307,8 +307,8 @@ class TestRedisQueue:
         (_, elements) = redis_queue.poll(1)
 
         assert len(elements) > 0
-        assert type(elements) is list
-        assert type(elements[0]) is str
+        assert isinstance(elements, list)
+        assert isinstance(elements[0], str)
         assert elements[0] == notification
 
         self.delete_all_list(redis)

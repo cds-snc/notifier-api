@@ -2,10 +2,10 @@ from itertools import product
 
 import pytest
 from flask import json
-
-from app.models import EMAIL_TYPE, TEMPLATE_TYPES
 from tests import create_authorization_header
 from tests.app.db import create_template
+
+from app.models import EMAIL_TYPE, TEMPLATE_TYPES
 
 
 def test_get_all_templates_returns_200(client, sample_service):

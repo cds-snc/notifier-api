@@ -23,7 +23,6 @@ from app import (
     email_normal_publish,
     email_priority_publish,
     notify_celery,
-    redis_store,
     signer_notification,
     sms_bulk_publish,
     sms_normal_publish,
@@ -684,7 +683,7 @@ def get_reply_to_text(notification_type, form, template, form_field=None):
 
 
 def strip_keys_from_personalisation_if_send_attach(personalisation):
-    return {k: v for (k, v) in personalisation.items() if not (type(v) is dict and v.get("sending_method") == "attach")}
+    return {k: v for (k, v) in personalisation.items() if not (isinstance(v, dict) and v.get("sending_method") == "attach")}
 
 
 def check_for_csv_errors(recipient_csv, max_rows, remaining_daily_messages, remaining_annual_messages):

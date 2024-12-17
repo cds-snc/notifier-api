@@ -165,8 +165,8 @@ def handle_sql_error(e, table_name):
         and hasattr(e.orig, "pgerror")
         and e.orig.pgerror
         and (
-            'insert or update on table "{0}" violates '
-            'foreign key constraint "{0}_service_id_fkey"'.format(table_name) in e.orig.pgerror
+            'insert or update on table "{0}" violates ' 'foreign key constraint "{0}_service_id_fkey"'.format(table_name)
+            in e.orig.pgerror
         )
     ):
         return jsonify(result="error", message="No result found"), 404
