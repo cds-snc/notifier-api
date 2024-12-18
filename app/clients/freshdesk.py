@@ -40,6 +40,14 @@ class Freshdesk(object):
             # the ">" character breaks rendering for the freshdesk preview in slack
             if self.contact.department_org_name:
                 self.contact.department_org_name = self.contact.department_org_name.replace(">", "/")
+            # Add custom limit only if requested
+            daily_email_volume = f"{self.contact.daily_email_volume}"
+            daily_sms_volume = f"{self.contact.daily_sms_volume}"
+            if self.contact.how_many_more_sms:
+                daily_email_volume += f" ({self.contact.how_many_more_email})"
+            if self.contact.how_many_more_sms:
+                daily_sms_volume += f" ({self.contact.how_many_more_sms})"
+
             message = "<br>".join(
                 [
                     f"{self.contact.service_name} just requested to go live.",
@@ -47,8 +55,14 @@ class Freshdesk(object):
                     f"- Department/org: {self.contact.department_org_name}",
                     f"- Intended recipients: {self.contact.intended_recipients}",
                     f"- Purpose: {self.contact.main_use_case}",
-                    f"- Notification types: {self.contact.notification_types}",
-                    f"- Expected monthly volume: {self.contact.expected_volume}",
+                    "",
+                    "- Expected email volumes:",
+                    f"- Daily: {daily_email_volume}",
+                    f"- Yearly: {self.contact.annual_email_volume}",
+                    "",
+                    "- Expected SMS volumes:",
+                    f"- Daily: {daily_sms_volume}",
+                    f"- Yearly: {self.contact.annual_sms_volume}",
                     "---",
                     self.contact.service_url,
                 ]

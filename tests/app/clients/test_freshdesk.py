@@ -73,12 +73,19 @@ class TestSendTicket:
             expected = {
                 "product_id": 42,
                 "subject": "Support Request",
-                "description": "t6 just requested to go live.<br><br>"
+                "description": "t6 just requested to go live.<br>"
+                "<br>"
                 "- Department/org: department_org_name<br>"
                 "- Intended recipients: internal, external, public<br>"
                 "- Purpose: main_use_case<br>"
-                "- Notification types: email, sms<br>"
-                "- Expected monthly volume: 100k+<br>"
+                "<br>"
+                "- Expected email volumes:<br>"
+                "- Daily: above_limit (None)<br>"
+                "- Yearly: within_limit<br>"
+                "<br>"
+                "- Expected SMS volumes:<br>"
+                "- Daily: more_sms (54321)<br>"
+                "- Yearly: above_limit<br>"
                 "---<br>"
                 "http://localhost:6012/services/8624bd36-b70b-4d4b-a459-13e1f4770b92",
                 "email": "test@email.com",
@@ -113,6 +120,12 @@ class TestSendTicket:
                 "service_url": "http://localhost:6012/services/8624bd36-b70b-4d4b-a459-13e1f4770b92",
                 "notification_types": "email, sms",
                 "expected_volume": "100k+",
+                "daily_email_volume": "above_limit",
+                "annual_email_volume": "within_limit",
+                "daily_sms_volume": "more_sms",
+                "annual_sms_volume": "above_limit",
+                "how_many_more_email": None,
+                "how_many_more_sms": 54321,
             }
             with notify_api.app_context():
                 response = freshdesk.Freshdesk(ContactRequest(**data)).send_ticket()
