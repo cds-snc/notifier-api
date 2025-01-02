@@ -11,7 +11,7 @@ from notifications_utils.statsd_decorators import statsd
 from sqlalchemy import asc, desc, func
 
 from app import db
-from app.dao.dao_utils import transactional
+from app.dao.dao_utils import VersionOptions, transactional, version_class
 from app.dao.date_util import get_query_date_based_on_retention_period
 from app.dao.templates_dao import dao_get_template_by_id
 from app.models import (
@@ -24,6 +24,7 @@ from app.models import (
     NOTIFICATION_CANCELLED,
     NOTIFICATION_CREATED,
     Job,
+    JobHistory,
     Notification,
     NotificationHistory,
     ServiceDataRetention,
@@ -73,6 +74,7 @@ def dao_get_job_by_id(job_id) -> Job:
     return Job.query.filter_by(id=job_id).one()
 
 
+@version_class(VersionOptions(Job, history_class=JobHistory))
 def dao_archive_jobs(jobs: Iterable[Job]):
     """
     Archive the given jobs.
@@ -89,6 +91,7 @@ def dao_get_in_progress_jobs():
     return Job.query.filter(Job.job_status == JOB_STATUS_IN_PROGRESS).all()
 
 
+@version_class(VersionOptions(Job, history_class=JobHistory))
 def dao_set_scheduled_jobs_to_pending():
     """
     Sets all past scheduled jobs to pending, and then returns them for further processing.
@@ -125,6 +128,7 @@ def dao_get_future_scheduled_job_by_id_and_service_id(job_id, service_id):
     ).one()
 
 
+@version_class(VersionOptions(Job, history_class=JobHistory))
 def dao_create_job(job):
     if not job.id:
         job.id = uuid.uuid4()
@@ -132,6 +136,7 @@ def dao_create_job(job):
     db.session.commit()
 
 
+@version_class(VersionOptions(Job, history_class=JobHistory))
 def dao_update_job(job):
     db.session.add(job)
     db.session.commit()

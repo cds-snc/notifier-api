@@ -1451,6 +1451,7 @@ class Job(BaseModel):
     __tablename__ = "jobs"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    version = db.Column(db.Integer, primary_key=True, nullable=False)
     original_file_name = db.Column(db.String, nullable=False)
     service_id = db.Column(
         UUID(as_uuid=True),
@@ -1498,6 +1499,60 @@ class Job(BaseModel):
     )
     archived = db.Column(db.Boolean, nullable=False, default=False)
     sender_id = db.Column(UUID(as_uuid=True), index=False, unique=False, nullable=True)
+
+
+class JobHistory(BaseModel):
+    __tablename__ = "jobs_history"
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    original_file_name = db.Column(db.String, nullable=False)
+    service_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey("services.id"),
+        index=True,
+        unique=False,
+        nullable=False,
+    )
+    service = db.relationship("Service", backref=db.backref("jobs_history", lazy="dynamic"))
+    template_id = db.Column(UUID(as_uuid=True), db.ForeignKey("templates.id"), index=True, unique=False)
+    template = db.relationship("Template", backref=db.backref("jobs_history", lazy="dynamic"))
+    template_version = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        index=False,
+        unique=False,
+        nullable=False,
+        default=datetime.datetime.utcnow,
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        index=False,
+        unique=False,
+        nullable=True,
+        onupdate=datetime.datetime.utcnow,
+    )
+    notification_count = db.Column(db.Integer, nullable=False)
+    notifications_sent = db.Column(db.Integer, nullable=False, default=0)
+    notifications_delivered = db.Column(db.Integer, nullable=False, default=0)
+    notifications_failed = db.Column(db.Integer, nullable=False, default=0)
+
+    processing_started = db.Column(db.DateTime, index=False, unique=False, nullable=True)
+    processing_finished = db.Column(db.DateTime, index=False, unique=False, nullable=True)
+    created_by = db.relationship("User")
+    created_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), index=True, nullable=True)
+    api_key_id = db.Column(UUID(as_uuid=True), db.ForeignKey("api_keys.id"), index=True, nullable=True)
+    api_key = db.relationship("ApiKey")
+    scheduled_for = db.Column(db.DateTime, index=True, unique=False, nullable=True)
+    job_status = db.Column(
+        db.String(255),
+        db.ForeignKey("job_status.name"),
+        index=True,
+        nullable=False,
+        default="pending",
+    )
+    archived = db.Column(db.Boolean, nullable=False, default=False)
+    sender_id = db.Column(UUID(as_uuid=True), index=False, unique=False, nullable=True)
+    version = db.Column(db.Integer, default=0, nullable=False)
 
 
 VERIFY_CODE_TYPES = [EMAIL_TYPE, SMS_TYPE]
