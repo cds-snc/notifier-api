@@ -31,11 +31,12 @@ default_category_id = current_app.config["DEFAULT_TEMPLATE_CATEGORY_LOW"]
 
 
 def upgrade():
-    password = hashpw(
-        hashlib.sha256(
-            (current_app.config["CYPRESS_USER_PW_SECRET"] + current_app.config["DANGEROUS_SALT"]).encode("utf-8")
-        ).hexdigest()
-    )
+    cypress_user_pw = current_app.config.get("CYPRESS_USER_PW_SECRET")
+    if not cypress_user_pw:
+        cypress_user_pw = uuid.uuid4().hex[:32]
+        current_app.logger.warning(f"CYPRESS_USER_PW_SECRET not set, using random password")
+
+    password = hashpw(hashlib.sha256((cypress_user_pw + current_app.config["DANGEROUS_SALT"]).encode("utf-8")).hexdigest())
     current_year = get_current_financial_year_start_year()
     default_limit = 250000
 
