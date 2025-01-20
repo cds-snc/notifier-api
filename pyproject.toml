@@ -30,7 +30,7 @@ environs = "9.5.0" # pyup: <9.3.3 # marshmallow v3 throws errors"
 fido2 = "0.9.3"
 Flask-Bcrypt = "1.0.1"
 Flask-Migrate = "2.7.0"
-Flask-SQLAlchemy = { git = "https://github.com/pallets-eco/flask-sqlalchemy.git", rev = "500e732dd1b975a56ab06a46bd1a20a21e682262"}
+Flask-SQLAlchemy = { git = "https://github.com/pallets-eco/flask-sqlalchemy.git", rev = "3e3e92ba557649ab5251eda860a67656cc8c10af"}
 #git+https://github.com/mitsuhiko/flask-sqlalchemy.git@500e732dd1b975a56ab06a46bd1a20a21e682262#egg=Flask-SQLAlchemy==2.3.2.dev20190108
 Flask = "2.3.3"
 click-datetime = "0.2"
