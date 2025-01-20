@@ -31,7 +31,9 @@ from app.models import (
     JOB_STATUS_SCHEDULED,
     SMS_TYPE,
 )
-from app.notifications.process_notifications import simulated_recipient
+from app.notifications.process_notifications import (
+    csv_has_simulated_and_non_simulated_recipients,
+)
 from app.notifications.validators import (
     check_email_annual_limit,
     check_email_daily_limit,
@@ -175,16 +177,16 @@ def create_job(service_id):
         data["sender_id"] = data.get("sender_id", default_sender_id)
 
         # calculate the number of simulated recipients
-        numberOfSimulated = sum(simulated_recipient(i["phone_number"].data, template.template_type) for i in recipient_csv.rows)
-        mixedRecipients = numberOfSimulated > 0 and numberOfSimulated != len(recipient_csv)
+        requested_recipients = [i["phone_number"].data for i in list(recipient_csv.get_rows())]
+        has_simulated, has_real_recipients = csv_has_simulated_and_non_simulated_recipients(
+            requested_recipients, template.template_type
+        )
 
-        # if they have specified testing and NON-testing recipients, raise an error
-        if mixedRecipients:
+        if has_simulated and has_real_recipients:
             raise InvalidRequest(message="Bulk sending to testing and non-testing numbers is not supported", status_code=400)
 
-        is_test_notification = len(recipient_csv) == numberOfSimulated
-
-        if not is_test_notification:
+        # Check and track limits if we're not sending test notifications
+        if has_real_recipients and not has_simulated:
             check_sms_annual_limit(service, len(recipient_csv))
             check_sms_daily_limit(service, len(recipient_csv))
             increment_sms_daily_count_send_warnings_if_needed(service, len(recipient_csv))

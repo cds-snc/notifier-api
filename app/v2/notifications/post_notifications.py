@@ -66,6 +66,7 @@ from app.models import (
 from app.notifications.process_letter_notifications import create_letter_notification
 from app.notifications.process_notifications import (
     choose_queue,
+    csv_has_simulated_and_non_simulated_recipients,
     db_save_and_send_notification,
     persist_notification,
     persist_scheduled_notification,
@@ -232,15 +233,6 @@ def post_bulk():
     check_for_csv_errors(recipient_csv, max_rows, remaining_daily_messages, remaining_annual_messages)
     notification_count_requested = len(list(recipient_csv.get_rows()))
 
-    for row in recipient_csv.get_rows():
-        try:
-            validate_template(template.id, row.personalisation, authenticated_service, template.template_type)
-        except BadRequestError as e:
-            message = e.message + ". Notification to {} on row #{} exceeds the maximum size limit.".format(
-                row.recipient, row.index + 1
-            )
-            raise BadRequestError(message=message)
-
     if template.template_type == EMAIL_TYPE and api_user.key_type != KEY_TYPE_TEST:
         check_email_annual_limit(authenticated_service, notification_count_requested)
         check_email_daily_limit(authenticated_service, notification_count_requested)
@@ -257,16 +249,16 @@ def post_bulk():
             form["validated_sender_id"] = default_sender_id
 
         # calculate the number of simulated recipients
-        numberOfSimulated = sum(
-            simulated_recipient(i["phone_number"].data, template.template_type) for i in list(recipient_csv.get_rows())
+        requested_recipients = [i["phone_number"].data for i in list(recipient_csv.get_rows())]
+        has_simulated, has_real_recipients = csv_has_simulated_and_non_simulated_recipients(
+            requested_recipients, template.template_type
         )
-        mixedRecipients = numberOfSimulated > 0 and numberOfSimulated != notification_count_requested
 
         # if its a live or a team key, and they have specified testing and NON-testing recipients, raise an error
-        if api_user.key_type != KEY_TYPE_TEST and mixedRecipients:
+        if api_user.key_type != KEY_TYPE_TEST and (has_simulated and has_real_recipients):
             raise BadRequestError(message="Bulk sending to testing and non-testing numbers is not supported", status_code=400)
 
-        is_test_notification = api_user.key_type == KEY_TYPE_TEST or notification_count_requested == numberOfSimulated
+        is_test_notification = api_user.key_type == KEY_TYPE_TEST or (has_simulated and not has_real_recipients)
 
         if not is_test_notification:
             check_sms_annual_limit(authenticated_service, len(recipient_csv))
