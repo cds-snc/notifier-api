@@ -2,7 +2,7 @@ import datetime
 import itertools
 import uuid
 from enum import Enum
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, cast
 
 from flask import current_app, url_for
 from flask_sqlalchemy.model import DefaultMeta
@@ -33,6 +33,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from app import (
     DATETIME_FORMAT,
     db,
+    db_type,
     signer_api_key,
     signer_bearer_token,
     signer_inbound_sms,
@@ -50,6 +51,7 @@ LETTER_TYPE = "letter"
 
 TEMPLATE_TYPES = [SMS_TYPE, EMAIL_TYPE, LETTER_TYPE]
 
+db = cast(db_type, db)  # type: ignore
 template_types = db.Enum(*TEMPLATE_TYPES, name="template_type")
 
 NORMAL = "normal"
@@ -92,7 +94,7 @@ class HistoryModel:
                 current_app.logger.debug("{} has no column {} to copy from".format(original, c.name))
 
 
-BaseModel: DefaultMeta = db.Model
+BaseModel: DefaultMeta = db.Model  # type: ignore
 
 
 class User(BaseModel):
