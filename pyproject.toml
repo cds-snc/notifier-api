@@ -74,7 +74,7 @@ simple-salesforce = "^1.12.3"
 
 # Pinned dependencies
 certifi = "^2024.0.0" # pinned for security reasons: https://github.com/cds-snc/notification-api/security/dependabot/119
-idna = "2.10" # pinned to align with test moto dependency requirements (for <=2.9)
+idna = "3.7" # pinned to align with test moto dependency requirements (for <=2.9)
 flask-marshmallow = "0.14.0"
 aws-xray-sdk = "2.14.0"
 
@@ -83,7 +83,7 @@ flake8 = "6.1.0"
 gprof2dot = "2024.6.6"
 isort = "5.13.2"
 moto = "4.2.14"
-idna = "2.10"
+idna = "3.7"
 pytest = "7.4.4"
 pytest-env = "0.8.2"
 pytest-mock = "3.14.0"
