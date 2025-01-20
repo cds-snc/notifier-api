@@ -315,6 +315,17 @@ def beat_inbox_email_bulk():
         receipt_id_email, list_of_email_notifications = email_bulk.poll()
 
 
+if current_app.config["FF_DEBUG_STACK_TRACE"]:
+
+    @notify_celery.task(name="debug-stack-trace")
+    @statsd(namespace="tasks")
+    def debug_stack_trace():
+        """
+        This function, when enabled, will throw an exception so that we can test multi-line logging
+        """
+        raise Exception("Debugging")
+
+
 @notify_celery.task(name="beat-inbox-email-priority")
 @statsd(namespace="tasks")
 def beat_inbox_email_priority():
@@ -325,6 +336,7 @@ def beat_inbox_email_priority():
     to another list(list#2). The heartbeat will then call a job that saves list#2 to the DB
     and actually sends the email for each notification saved.
     """
+
     receipt_id_email, list_of_email_notifications = email_priority.poll()
 
     while list_of_email_notifications:
