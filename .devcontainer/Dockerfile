@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.12
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.13
 
 ARG KUBENS_VERSION="0.9.4"
 ENV POETRY_VERSION="1.7.1"
